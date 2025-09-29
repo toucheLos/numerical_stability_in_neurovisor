@@ -1,7 +1,6 @@
 To Do:
 
 1.) Complete Euler Implementation
- - Make sure it works
 
 2.) Compare Voltages with NeuroVISOR
  - Remember that this is a single compartment neuron
