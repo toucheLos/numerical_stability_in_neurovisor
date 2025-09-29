@@ -17,6 +17,7 @@ def expm1_div(x_num, x_den):
     Stable x_num/(exp(x_den)-1). Uses np.expm1 and a series near 0.
     Works elementwise for numpy arrays or scalars.
     """
+    # expm1 computes e^{x} - 1
     d = np.expm1(x_den)
     x_num = np.asarray(x_num)
     d = np.asarray(d)
@@ -51,9 +52,7 @@ E_DEFAULT = dict(
 V_SHIFTS = dict(vT=0.0, Vx=2.0)
 
 
-# =========================================================
 # Potassium (KDR) — gate n (Pospischil 2008)
-# =========================================================
 def k_rates(V, vT_mV=V_SHIFTS['vT']):
     """
     Returns alpha_n(V), beta_n(V) [1/s].
@@ -88,15 +87,15 @@ def na_rates(V, vT_mV=V_SHIFTS['vT']):
     bh = 1.0e3 * 4.0 / (1.0 + np.exp(-(Vm - vT - 40.0)/5.0))
 
     return am, bm, ah, bh
-
+ 
 def na_current(V, m, h, gna=G_DEFAULT['gna'], Ena=E_DEFAULT['Ena']):
-    """I_Na = gna * m^3 * h * (V - Ena)."""
+    # I_Na = gna * m^3 * h * (V - Ena).
     return gna * (m**3) * h * (V - Ena)
 
 
 # Leak (ohmic)
 def leak_current(V, gl=G_DEFAULT['gl'], El=E_DEFAULT['El']):
-    """I_Leak = gl * (V - El)."""
+    # I_Leak = gl * (V - El)
     return gl * (V - El)
 
 
@@ -126,7 +125,7 @@ def ca_high_current(V, q, r, gca=G_DEFAULT['gcaH'], Eca=E_DEFAULT['Eca']):
 
 # Slow Potassium (M-current) — gate p
 def m_p_inf(V):
-    """p_inf(V) (unitless)."""
+    # p_inf(V) (unitless)
     Vm = mV(V)
     return 1.0 / (1.0 + np.exp(-(Vm + 35.0)/10.0))
 
@@ -136,7 +135,7 @@ def m_tau_p(V, tmax=4.0):
     return tmax / (3.3*np.exp((Vm + 35.0)/20.0) + np.exp(-(Vm + 35.0)/20.0))
 
 def m_alpha_beta(V, tmax=4.0):
-    """Return alpha_p, beta_p from p_inf/tau."""
+    # Return alpha_p, beta_p from p_inf/tau.
     pinf = m_p_inf(V)
     tau  = m_tau_p(V, tmax)
     a = np.divide(pinf, tau, out=np.zeros_like(pinf), where=(tau!=0))
@@ -207,19 +206,3 @@ if __name__ == "__main__":
     s_inf = t_s_inf(V); ui = t_u_inf(V); tauu = t_tau_u(V)
     au, bu = t_alpha_beta_u(V)
     print("T: s_inf =", s_inf, "u_inf =", ui, "tau_u =", tauu, "alpha_u =", au, "beta_u =", bu)
-
-    # Example currents if you have some gate states:
-    n = np.array([0.03, 0.1, 0.3])
-    m = np.array([0.02, 0.05, 0.1])
-    h = np.array([0.99, 0.95, 0.9])
-    q = np.array([0.1, 0.2, 0.2])
-    r = np.array([0.8, 0.7, 0.6])
-    p = np.array([0.1, 0.2, 0.4])
-    u = np.array([0.2, 0.3, 0.4])
-
-    print("I_K   =", k_current(V, n))
-    print("I_Na  =", na_current(V, m, h))
-    print("I_Leak=", leak_current(V))
-    print("I_CaH =", ca_high_current(V, q, r))
-    print("I_M   =", m_current(V, p))
-    print("I_T   =", t_current(V, u))
