@@ -31,7 +31,7 @@ E_DEFAULT = dict(
     Eca = 120.0e-3,
 )
 
-# Optional voltage shift used in some fits (mV)
+# Optional voltage shift
 V_SHIFTS = dict(vT=0.0, Vx=2.0)
 
 
@@ -56,7 +56,7 @@ def na_rates(V, vT_mV=V_SHIFTS['vT']):
     vT = float(vT_mV)
 
     am = 1.0e3 * (-0.32 * (Vm - vT - 13.0)) / (np.exp(-(Vm - vT - 13.0) / 4.0) - 1)
-    bm = 1.0e3 * (0.28 * (Vm - vT - 40.0)) / (np.exp(Vm - vT - 40.0) / 5.0 - 1)
+    bm = 1.0e3 * (0.28 * (Vm - vT - 40.0)) / (np.exp((Vm - vT - 40.0) / 5.0) - 1)
 
     ah = 1.0e3 * 0.128 * np.exp(-(Vm - vT - 17.0) / 18.0)
     bh = 1.0e3 * 4.0 / (1.0 + np.exp(-(Vm - vT - 40.0)/5.0))

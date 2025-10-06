@@ -15,6 +15,12 @@ USE_M   = False # p (slow K / M-current)
 # Membrane Capacitance
 C_m = 1.0e-2
 
+# Radius of the cell (for area calculation)
+radius = 33.5 * 1e-6 # in meters
+
+# Soma Area (in m^2)
+soma_area = 4.0 * np.pi * (radius)**2
+
 def I_stim(t):
     return 0.1
 
@@ -54,7 +60,7 @@ def rhs(y, t):
     if USE_T:
         au, bu = ch.t_alpha_beta_u(Vv)
         du = (au[0]*(1.0 - u) - bu[0]*u)
-        # s is also applied, but is instantaneous
+        s = ch.t_s_inf(np.array([V]))[0]            # instantaneous
 
 
     # Section 3: Compute Ionic Current
@@ -68,10 +74,10 @@ def rhs(y, t):
     if USE_CaH:
         Im += ch.ca_high_current(V, q, r)
     if USE_T:
-        Im += ch.t_current(V, u)
+        Im += ch.G_DEFAULT['gT'] * (s**2) * u * (V - ch.E_DEFAULT['Eca'])
     if USE_M:
         Im += ch.m_current(V, p)
-    # dV/dt = (I_stim - Im) / C_m
+
     dV = (I_stim(t) - Im) / C_m
     
     return np.array([dV, dm, dn, dh, dp, dq, du, dr], dtype=float)
@@ -104,7 +110,7 @@ def forward_euler(y0, dt, steps, rhs):
 if __name__ == "__main__":
     # Simulation settings
     T  = 0.02 # seconds
-    dt = 1e-6 # seconds
+    dt = 50e-6 # seconds
     steps = int(round(T / dt))
     V0 = 0.0 # intial Voltage (in V)
 
@@ -116,7 +122,7 @@ if __name__ == "__main__":
         0.9959410 if USE_NA else 0.0, # h
         0.0 if USE_M  else 0.0, # p
         0.02, # q
-        0.0, # u
+        0.1 if USE_T else 0.0, # u
         0.01 #r
     ], dtype=float)
 
