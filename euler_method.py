@@ -15,14 +15,14 @@ USE_M   = False # p (slow K / M-current)
 # Membrane Capacitance
 C_m = 1.0e-2
 
-# Radius of the cell (for area calculation)
-radius = 33.5 * 1e-6 # in meters
-
-# Soma Area (in m^2)
-soma_area = 4.0 * np.pi * (radius)**2
+# Soma geometry
+radius = 33.5e-6 # meters
+soma_area = 4.0 * np.pi * radius**2 # m^2
+C_tot = C_m * soma_area  # F (total capacitance)
 
 def I_stim(t):
     return 0.1
+    # return 100e-12 if (5e-3 <= t < 10e-3) else 0.0
 
 # Section 2: Update Gating Variables (Forward Euler at V)
 
@@ -32,8 +32,7 @@ def I_stim(t):
 def rhs(y, t):
     # This is the RHS for gating variables at fixed voltage V
     # gates = [m, n, h, p, q, u, r]
-    V = y[0]
-    m, n, h, p, q, u, r = y[1:]
+    V, m, n, h, p, q, u, r = y
     Vv = np.array([V])  # ion_channels expects array input
 
     # Initialize derivatives
@@ -78,7 +77,12 @@ def rhs(y, t):
     if USE_M:
         Im += ch.m_current(V, p)
 
+    Im_tot = Im * soma_area
+
     dV = (I_stim(t) - Im) / C_m
+    # dV_tot = (I_stim(t) - Im_tot) / C_tot
+
+    # print(str(dV_tot - dV))
     
     return np.array([dV, dm, dn, dh, dp, dq, du, dr], dtype=float)
 
@@ -96,10 +100,8 @@ def forward_euler(y0, dt, steps, rhs):
 
     for k in range(steps):
         tk = k * dt
-        t[k] = tk
+        # t[k] = tk
         y = y + dt * rhs(y, tk)
-        # clamp to [0,1] since these are probabilities
-        # np.clip(y, 0.0, 1.0, out=y)
         Y[k + 1] = y
 
     t[steps] = steps * dt
@@ -109,7 +111,7 @@ def forward_euler(y0, dt, steps, rhs):
 
 if __name__ == "__main__":
     # Simulation settings
-    T  = 0.02 # seconds
+    T  = .5 # seconds
     dt = 50e-6 # seconds
     steps = int(round(T / dt))
     V0 = 0.0 # intial Voltage (in V)
