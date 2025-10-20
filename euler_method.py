@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import ion_channels as ch  # your channels-only module
+import ion_channels as ch  # channels-only module
 
 # Section 1: Define variables
 
@@ -17,12 +17,27 @@ C_m = 1.0e-2
 
 # Soma geometry
 radius = 33.5e-6 # meters
-soma_area = 4.0 * np.pi * radius**2 # m^2
+soma_area = 2.0 * np.pi * radius**2 # m^2
 C_tot = C_m * soma_area  # F (total capacitance)
 
 def I_stim(t):
     return 0.1
     # return 100e-12 if (5e-3 <= t < 10e-3) else 0.0
+
+import math
+r_um = 33.5       # µm
+L_um = 0.142857142857143       # set to your NV TargetEdgeLength (µm)
+
+A_sphere = 4*math.pi*(r_um*1e-6)**2
+A_cyl    = 2*math.pi*(r_um*1e-6)*(L_um)
+print("A_sphere =", A_sphere, "m^2")
+print("A_cyl    =", A_cyl,    "m^2")
+
+
+def patch_area_m2(r_um, L_um):
+    return 2*np.pi*(r_um*1e-6)*(L_um*1e-6)
+
+A_nv = patch_area_m2(5.0, 0.142857142857143)
 
 # Section 2: Update Gating Variables (Forward Euler at V)
 
@@ -109,10 +124,12 @@ def forward_euler(y0, dt, steps, rhs):
 
 # Section 5: Run the program
 
+# Change timesteps to capture convergence of a solution
+
 if __name__ == "__main__":
     # Simulation settings
-    T  = .5 # seconds
-    dt = 50e-6 # seconds
+    T  = 0.025 # seconds
+    dt = 50e-7 # seconds
     steps = int(round(T / dt))
     V0 = 0.0 # intial Voltage (in V)
 
