@@ -1,0 +1,9 @@
+⦁	Na-K+ mini-soma
+⦁	(I believe the error is rooted in my delay of recording in NV)
+
+=== Comparison Stats ===
+MSE    = 0.979576 mV
+RMSE   = 0.989735 mV
+MaxDiff= 16.289998 mV
+Done with voltage comparison script.
+

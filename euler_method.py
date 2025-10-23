@@ -8,7 +8,7 @@ import ion_channels as ch  # channels-only module
 USE_NA  = True # m, h
 USE_K   = True # n
 USE_LEAK = False
-USE_CaH = False  # q, r (high-threshold Ca) -- off here
+USE_CaH = True  # q, r (high-threshold Ca) -- off here
 USE_T   = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
 USE_M   = False # p (slow K / M-current)
 
@@ -16,28 +16,30 @@ USE_M   = False # p (slow K / M-current)
 C_m = 1.0e-2
 
 # Soma geometry
-radius = 33.5e-6 # meters
-soma_area = 2.0 * np.pi * radius**2 # m^2
+# radius = 5.0 # µm  (from NV Debug.Log)
+radius = 16.75 # mini-soma
+# length = 0.142857142857143 # µm  (Neuron.TargetEdgeLength)
+length = 0.25187969924812 # mini-soma
+soma_area = 2.0*np.pi*(radius*1e-6)*(length*1e-6)   # m^2
+print("soma_area = " + str(soma_area))
 C_tot = C_m * soma_area  # F (total capacitance)
 
 def I_stim(t):
-    return 0.1
-    # return 100e-12 if (5e-3 <= t < 10e-3) else 0.0
+    stimAmplitude = 0.015e-11 / soma_area
+    stimAmplitude1 = 0.03342253809
+    # print("stimAmp = " + str(stimAmplitude))
+    return 0.0
+    # return 0.03149 if (50e-3 <= t < 100e-3) else 0.0
+    # return stimAmplitude if (50e-3 <= t < 100e-3) else 0.0
 
-import math
-r_um = 33.5       # µm
-L_um = 0.142857142857143       # set to your NV TargetEdgeLength (µm)
+# import math
+# r_um = 33.5       # µm
+# L_um = 0.142857142857143       # set to your NV TargetEdgeLength (µm)
 
-A_sphere = 4*math.pi*(r_um*1e-6)**2
-A_cyl    = 2*math.pi*(r_um*1e-6)*(L_um)
-print("A_sphere =", A_sphere, "m^2")
-print("A_cyl    =", A_cyl,    "m^2")
-
-
-def patch_area_m2(r_um, L_um):
-    return 2*np.pi*(r_um*1e-6)*(L_um*1e-6)
-
-A_nv = patch_area_m2(5.0, 0.142857142857143)
+# A_sphere = 4*math.pi*(r_um*1e-6)**2
+# A_cyl    = 2*math.pi*(r_um*1e-6)*(L_um)
+# print("A_sphere =", A_sphere, "m^2")
+# print("A_cyl    =", A_cyl,    "m^2")
 
 # Section 2: Update Gating Variables (Forward Euler at V)
 
@@ -95,7 +97,7 @@ def rhs(y, t):
     Im_tot = Im * soma_area
 
     dV = (I_stim(t) - Im) / C_m
-    # dV_tot = (I_stim(t) - Im_tot) / C_tot
+    # dV = (I_stim(t) - Im_tot) / C_tot
 
     # print(str(dV_tot - dV))
     
@@ -128,8 +130,8 @@ def forward_euler(y0, dt, steps, rhs):
 
 if __name__ == "__main__":
     # Simulation settings
-    T  = 0.025 # seconds
-    dt = 50e-7 # seconds
+    T  = 150e-3 # seconds
+    dt = 50e-8 # seconds
     steps = int(round(T / dt))
     V0 = 0.0 # intial Voltage (in V)
 
@@ -171,3 +173,8 @@ if __name__ == "__main__":
     
     plt.tight_layout()
     plt.show()
+
+        # Export time and voltage to CSV
+    export_data = np.column_stack((t * 1e3, Y[:, 0] * 1e3))  # time (ms), voltage (mV)
+    np.savetxt("euler_trace.csv", export_data, delimiter=",", header="t(ms),V(mV)", comments='')
+    print("Exported: euler_trace.csv")
