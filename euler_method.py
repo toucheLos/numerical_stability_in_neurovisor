@@ -7,10 +7,10 @@ import ion_channels as ch  # channels-only module
 # Channel toggles (choose what to integrate)
 USE_NA  = True # m, h
 USE_K   = True # n
-USE_LEAK = False
-USE_CaH = False  # q, r (high-threshold Ca) -- off here
+USE_LEAK = True
+USE_CaH = True # q, r (high-threshold Ca) -- off here
 USE_T   = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
-USE_M   = False # p (slow K / M-current)
+USE_M   = True # p (slow K / M-current)
 
 # Membrane Capacitance
 C_m = 1.0e-2
@@ -25,11 +25,12 @@ print("soma_area = " + str(soma_area))
 C_tot = C_m * soma_area  # F (total capacitance)
 
 def I_stim(t):
-    stimAmplitude = 0.015e-11 / soma_area
+    stimAmplitude = 0.005172413793
+    # stimAmplitude = 0.015e-11 / soma_area
     # print("stimAmp = " + str(stimAmplitude))
     # return 0.0
     # return 0.03149 if (50e-3 <= t < 100e-3) else 0.0
-    return stimAmplitude if (50e-3 <= t < 100e-3) else 0.0
+    return stimAmplitude if (50e-3 <= t < 450e-3) else 0.0
 
 # import math
 # r_um = 33.5       # µm
@@ -129,10 +130,10 @@ def forward_euler(y0, dt, steps, rhs):
 
 if __name__ == "__main__":
     # Simulation settings
-    T  = 150e-3 # seconds
-    dt = 50e-8 # seconds
+    T  = 500e-3 # seconds
+    dt = 50e-7 # seconds
     steps = int(round(T / dt))
-    V0 = 0.0 # intial Voltage (in V)
+    V0 = -0.085 # intial Voltage (in V)
 
     # m, n, h, p, q, u, r = gates
     y0 = np.array([
@@ -171,7 +172,8 @@ if __name__ == "__main__":
     ax2.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.show()
+    plt.show(block=True)
+    plt.savefig("gating_plot.png")
 
         # Export time and voltage to CSV
     export_data = np.column_stack((t * 1e3, Y[:, 0] * 1e3))  # time (ms), voltage (mV)
