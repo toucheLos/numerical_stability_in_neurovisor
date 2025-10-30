@@ -15,24 +15,24 @@ def mV(V):
 # Default parameters
 # Conductances
 G_DEFAULT = dict(
-    gk   = 5.0e1,            # S/m^2
-    gna  = 50.0e1,           # S/m^2
-    gl   = 1.0e-4 * 1.0e4,   # S/m^2
-    gcaH = 1.0e-4 * 1.0e4,   # S/m^2 (High-threshold Ca; "calcium_channel" in your C#)
-    gM   = 7.5e-5 * 1.0e4,   # S/m^2 (Slow K / M-current; adjust as in your model)
-    gT   = 4.0e-4 * 1.0e4,   # S/m^2 (Low-threshold Ca, T-type)
+    gk   = 0.004 * 1e4,            # S/m^2
+    gna  = 0.05 * 1e4,           # S/m^2
+    gl   = 1.9e-5 * 1e4,   # S/m^2
+    gcaH = 0.001 * 1e4,   # S/m^2 (High-threshold Ca; "calcium_channel" in your C#)
+    gM   = 2.8e-5 * 1e4,   # S/m^2 (Slow K / M-current; adjust as in your model)
+    gT   = 0.0004 * 1e4,   # S/m^2 (Low-threshold Ca, T-type)
 )
 
 # Reversal potentials (V)
 E_DEFAULT = dict(
     Ek  = -90.0e-3,
-    Ena =  50.0e-3,
-    El  = -70.0e-3,
+    Ena = 50.0e-3,
+    El  = -50.0e-3,
     Eca = 120.0e-3,
 )
 
 # Optional voltage shift
-V_SHIFTS = dict(vT=0.0, Vx=2.0)
+V_SHIFTS = dict(vT=-50, Vx=-.007)
 
 
 # Potassium (KDR) — gate n (Pospischil 2008)
@@ -133,12 +133,9 @@ def t_u_inf(V, Vx_mV=V_SHIFTS['Vx']):
 
 def t_tau_u(V, Vx_mV=V_SHIFTS['Vx']):
     Vm = mV(V); Vx=float(Vx_mV)
-    num = (30.8 + 211.4 * np.exp((Vm + Vx + 113.2)/5.0))
+    num = (30.8 + 211.4 + np.exp((Vm + Vx + 113.2)/5.0))
     den = 3.7 * (1.0 + np.exp((Vm + Vx + 84.0)/3.2))
-    out = np.full_like(Vm, np.inf)
-    mask = den > 0
-    out[mask] = num[mask] / den[mask]
-    return out
+    return num / den
 
 def t_alpha_beta_u(V, Vx_mV=V_SHIFTS['Vx']):
     ui  = t_u_inf(V, Vx_mV)
@@ -178,4 +175,4 @@ if __name__ == "__main__":
     # Low-T Ca (T-type)
     s_inf = t_s_inf(V); ui = t_u_inf(V); tauu = t_tau_u(V)
     au, bu = t_alpha_beta_u(V)
-    print("T: s_inf =", s_inf, "u_inf =", ui, "tau_u =", tauu, "alpha_u =", au, "beta_u =", bu)
+    print("T: s_inf =", s_inf, "u_inf =", ui, "tau_u =", tauu, "alpha_u =", au, "beta_u =", bsu)

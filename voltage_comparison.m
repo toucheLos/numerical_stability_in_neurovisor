@@ -6,8 +6,8 @@
 % Each has columns [time, voltage].
 
 disp("Starting voltage comparison script...");
-data1 = readmatrix("C:\Users\playtoe\Programs\neuron\numerical_stability_in_neurovisor\neuron_recordings\ca-na-k-mini-soma.csv");
-data2 = readmatrix("C:\Users\playtoe\Programs\neuron\numerical_stability_in_neurovisor\neuron_recordings\euler_trace.csv");
+data1 = readmatrix("/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/neuron_recordings/na-k-mini-soma.csv");
+data2 = readmatrix("/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/neuron_recordings/euler_trace.csv");
 
 
 % 1) Extract columns
