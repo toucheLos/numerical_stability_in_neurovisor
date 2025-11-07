@@ -1,0 +1,41 @@
+load_file("stdrun.hoc")  // load standard run libraries
+
+// 1. Create and configure the soma
+create soma 
+access soma
+soma {
+    L = 20      // length in micrometers
+    diam = 20   // diameter in micrometers
+    insert hh   // insert Hodgkin-Huxley channels
+}
+
+// 2. Create an SEClamp at the middle of the soma
+objref clamp
+clamp = new SEClamp(soma(0.5))
+// duration (effectively infinite, in ms)
+clamp.dur1 = 1e9
+clamp.amp1 = 25     // clamp voltage in mV
+
+// 3. Set simulation parameters
+tstop = 100       // total simulation time in ms
+
+// 4. Record time and voltage at the soma (center)
+objref tvec, vvec
+tvec = new Vector()
+vvec = new Vector()
+tvec.record(&t)          // record simulation time
+vvec.record(&soma.v(0.5))  // record voltage at soma(0.5)
+
+// 5. Run the simulation
+run()
+
+// 6. Plot the recorded voltage vs. time
+objref graph
+graph = new Graph()
+graph.size(0, tstop, -80, 50)
+graph.addvar("V", vvec)
+graph.exec_menu("View & Plot")
+
+// 7. Print final voltage at the soma to the command window
+printf("Final voltage at soma: %g mV\n", soma.v(0.5))
+

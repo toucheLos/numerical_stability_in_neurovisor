@@ -5,12 +5,12 @@ import ion_channels as ch  # channels-only module
 # Section 1: Define variables
 
 # Channel toggles (choose what to integrate)
-USE_NA  = True # m, h
-USE_K   = True # n
-USE_LEAK = True
+USE_NA = True # m, h
+USE_K = True # n
+USE_LEAK = False
 USE_CaH = False  # q, r (high-threshold Ca) -- off here
-USE_T   = True # u (T-type Ca). s_inf is instantaneous and NOT integrated.
-USE_M   = True # p (slow K / M-current)
+USE_T = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
+USE_M = False # p (slow K / M-current)
 
 # Membrane Capacitance
 C_m = 1.0e-2
@@ -25,11 +25,11 @@ print("soma_area = " + str(soma_area))
 C_tot = C_m * soma_area  # F (total capacitance)
 
 def I_stim(t):
-    stimAmplitude = 0.015e-11 / soma_area
+    stimAmplitude = 0.15e-11 / soma_area
     # print("stimAmp = " + str(stimAmplitude))
     # return 0.0
     # return 0.03149 if (50e-3 <= t < 100e-3) else 0.0
-    return stimAmplitude if (50e-3 <= t < 500e-3) else 0.0
+    return stimAmplitude if (50e-3 <= t < 150e-3) else 0.0
 
 # import math
 # r_um = 33.5       # µm
@@ -75,7 +75,7 @@ def rhs(y, t):
     if USE_T:
         au, bu = ch.t_alpha_beta_u(Vv)
         du = (au[0]*(1.0 - u) - bu[0]*u)
-        s = ch.t_s_inf(np.array([V]))[0]            # instantaneous
+        s = ch.t_s_inf(np.array([V]))[0] # instantaneous
 
 
     # Section 3: Compute Ionic Current
@@ -129,10 +129,10 @@ def forward_euler(y0, dt, steps, rhs):
 
 if __name__ == "__main__":
     # Simulation settings
-    T  = 500e-3 # seconds
+    T  = 200e-3 # seconds
     dt = 50e-7 # seconds
     steps = int(round(T / dt))
-    V0 = -0.05 # intial Voltage (in V)
+    V0 = 0.0 # intial Voltage (in V)
 
     # m, n, h, p, q, u, r = gates
     y0 = np.array([

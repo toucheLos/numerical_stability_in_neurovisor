@@ -1,0 +1,48 @@
+begintemplate Cell
+public soma, axon, dend, presyn, postsyn
+
+create soma, axon, dend[1]
+
+objectvar postsyn[1]
+objectvar presyn
+
+proc init() {local i
+    ndend = $1
+
+    create soma, axon
+
+    objectvar postsyn[ndend]
+    objectvar presyn
+
+    soma {
+	nseg = 1
+	diam = 100
+	L = 100
+	insert hh
+    }
+    axon {
+	nseg = 50
+	diam = 10
+	L = 5000
+	insert hh
+    }
+    for i = 0, ndend-1 dend[i] {
+	nseg = 5
+	diam = 25
+	L = 500
+	insert pas
+    }
+
+    connect axon(1), soma(0)
+    for i = 0, ndend-1 connect dend[i](0), soma(1)
+
+    for i = 0, ndend-1 dend[i] {
+	postsyn[i] = new TrigSyn(0.8)
+	postsyn[i].tau = 0.1
+	postsyn[i].e = 15
+    }
+
+    axon presyn = new APTrig(0)
+    presyn.mag = 2.8
+}
+endtemplate Cell
