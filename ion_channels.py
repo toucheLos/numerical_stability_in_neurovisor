@@ -18,7 +18,7 @@ G_DEFAULT = dict(
     gk   = 5.0e1,            # S/m^2
     gna  = 50.0e1,           # S/m^2
     gl   = 1.0,   # S/m^2
-    gcaH = 0.0001 * 1.0E4,   # S/m^2 (High-threshold Ca; "calcium_channel" in your C#)
+    gcaH = 0.000    1 * 1.0E4,   # S/m^2 (High-threshold Ca; "calcium_channel" in your C#)
     gM   = 7.5e-5 * 1.0e4,   # S/m^2 (Slow K / M-current; adjust as in your model)
     gT   = 4.0e-4 * 1.0e4,   # S/m^2 (Low-threshold Ca, T-type)
 )

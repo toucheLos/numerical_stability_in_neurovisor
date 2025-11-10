@@ -32,7 +32,7 @@ UNITS {
 }
 
 PARAMETER {
-    gnabar = 0.60 (mS/cm2)   : from 60.0e1 => 0.60 S/cm^2
+    gnabar = 0.5 (mS/cm2)   : from 50.0e1 => 0.50 S/cm^2
 }
 
 STATE {
@@ -42,6 +42,7 @@ STATE {
 
 ASSIGNED {
     v (mV)
+    vT (mV)
     ena (mV)
     ina (mA/cm2)
     alpha_m (1/ms)
