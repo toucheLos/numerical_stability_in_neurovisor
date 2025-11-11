@@ -16,33 +16,27 @@ ENDCOMMENT
 NEURON {
     SUFFIX original_na
     USEION na READ ena WRITE ina
-    RANGE gnabar, ina
+    RANGE gnabar, ina, vshift
     RANGE m, h
 }
 
 UNITS {
-    (mV)     = (millivolt)
-    (mA)     = (milliamp)
-    (mS)     = (millisiemens)
-    (S)      = (siemens)
-    (pA)     = (picoamp)
-    (um)     = (micron)
-    (mA/cm2) = (milliamp / square centimeter)
-    (mS/cm2) = (millisiemens / square centimeter)
+    (mV) = (millivolt)
+    (mA) = (milliamp)
+    (mS) = (millisiemens)
 }
 
 PARAMETER {
-    gnabar = 0.5 (mS/cm2)   : from 50.0e1 => 0.50 S/cm^2
+    gnabar = 0.5 (mS/cm2)
+    vshift = 0 (mV) : positive shifts activation to more depolarized voltages
 }
 
 STATE {
-    m
-    h
+    m h
 }
 
 ASSIGNED {
     v (mV)
-    vT (mV)
     ena (mV)
     ina (mA/cm2)
     alpha_m (1/ms)
@@ -53,7 +47,7 @@ ASSIGNED {
 
 BREAKPOINT {
     SOLVE states METHOD cnexp
-    ina = gnabar*(m^3)*h*(v - ena)
+    ina = gnabar*(m*m*m)*h*(v - ena)
 }
 
 DERIVATIVE states {
@@ -62,10 +56,14 @@ DERIVATIVE states {
     h' = alpha_h*(1 - h) - beta_h*h
 }
 
-PROCEDURE rates(v(mV)) {
-    alpha_m = (0.32)*(13.0 - v)/( exp((13.0 - v)/4.0) - 1.0 )*(1e3)
-    beta_m  = (0.28)*(v - 40.0)/( exp((v - 40.0)/5.0) - 1.0 )*(1e3)
+PROCEDURE rates(v (mV)) {
+    LOCAL vs
+    vs = v - vshift
 
-    alpha_h = (0.128)*exp((17.0 - v)/18.0)*(1e3)
-    beta_h  = (4.0)/( exp((40.0 - v)/5.0)+1.0 )*(1e3)
+    : Rates are in 1/ms (NEURON uses ms). NO *1e3 factor here.
+    alpha_m = 0.32 * (13.0 - vs) / (exp((13.0 - vs)/4.0) - 1.0)
+    beta_m  = 0.28 * (vs - 40.0) / (exp((vs - 40.0)/5.0) - 1.0)
+
+    alpha_h = 0.128 * exp((17.0 - vs)/18.0)
+    beta_h  = 4.0 / (exp((40.0 - vs)/5.0) + 1.0)
 }

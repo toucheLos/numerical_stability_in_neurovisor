@@ -6,8 +6,8 @@
 % Each has columns [time, voltage].
 
 disp("Starting voltage comparison script...");
-data1 = readmatrix("C:\Users\playtoe\Programs\neuron\neurovisor-current\Assets\CSV_Files\neuro_visor_recording_11-03-2025-03-38-42.csv");
-data2 = readmatrix("C:\Users\playtoe\Programs\neuron\yale\originalChannels_soma.csv");
+data1 = readmatrix("C:\Users\playtoe\Programs\neuron\neurovisor-current\Assets\CSV_Files\neuro_visor_recording_11-10-2025-12-18-08.csv");
+data2 = readmatrix("C:\Users\playtoe\Programs\neuron\numerical_stability_in_neurovisor\neuron_recordings\euler_trace.csv");
 
 
 % 1) Extract columns
@@ -36,19 +36,19 @@ fprintf('RMSE   = %.6f mV\n', rmseVal);
 fprintf('MaxDiff= %.6f mV\n', maxDiff);
 
 % 4) Plot
-figure('Name','Euler vs NeuroVISOR','Color','white');
+figure('Name','Voltage Comparison','Color','white');
 subplot(2,1,1);
 plot(t_ya, v_ya, 'b-', 'LineWidth',1.5); hold on;
 plot(t_ya, v_nv_interp, 'r--', 'LineWidth',1.2);
 xlabel('Time (ms)'); ylabel('Voltage (mV)');
-title('Euler vs NeuroVISOR');
+title('Voltage Comparison');
 legend({'Euler','NeuroVISOR'}, 'Location','best');
 grid on;
 
 subplot(2,1,2);
 plot(t_ya, diffVec, 'k-', 'LineWidth',1.2);
 xlabel('Time (ms)'); ylabel('Voltage Diff (mV)');
-title('Difference: Euler - Neurovisor');
+title('Difference Graph');
 grid on;
 
 % fprintf('%.6f, %.6f', max(data2), min(data2));

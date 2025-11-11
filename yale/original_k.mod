@@ -1,19 +1,21 @@
-TITLE Original Potassium Channel (Minimal)
+TITLE Original Potassium Channel (Minimal, with vshift)
 
 COMMENT
-Implements a basic Hodgkin-Huxley style K+ channel with:
-  gKbar = 5.0e1 S/m^2 => 0.05 (mS/cm2)
-  ek    = -90 mV
-Gating variable n with exponent 4, using alpha_n / beta_n from your snippet:
- alpha_n(V) = 1e3 * 0.032*(15 - V)/( exp((15-V)/5)-1 )
- beta_n(V)  = 1e3 * 0.5*exp((10 - V)/40)
+Implements a basic Hodgkin-Huxley style K+ channel with adjustable voltage shift.
+
+Original rate equations:
+  alpha_n(V) = 1e3 * 0.032 * (15 - V) / (exp((15 - V)/5) - 1)
+  beta_n(V)  = 1e3 * 0.5 * exp((10 - V)/40)
+
+Adding vshift -> use vs = v - vshift
+
+A positive vshift shifts activation rightward (requires more depolarization).
 ENDCOMMENT
 
 NEURON {
     SUFFIX original_k
     USEION k READ ek WRITE ik
-    RANGE gkbar, ik
-    RANGE n
+    RANGE gkbar, ik, n, vshift
 }
 
 UNITS {
@@ -28,7 +30,8 @@ UNITS {
 }
 
 PARAMETER {
-    gkbar = 0.05 (mS/cm2)   : from 5.0e1 S/m^2 => 0.05 S/cm^2
+    gkbar = 0.5 (mS/cm2)
+    vshift = 0 (mV)   : positive shifts activation to higher voltages
 }
 
 STATE {
@@ -50,11 +53,13 @@ BREAKPOINT {
 
 DERIVATIVE states {
     rates(v)
-    n' = alpha_n*(1 - n) - beta_n*n
+    n' = alpha_n * (1 - n) - beta_n * n
 }
 
-PROCEDURE rates(v(mV)) {
-    : Direct from your snippet, no expansions
-    alpha_n = (0.032)*(15.0 - v)/( exp((15.0 - v)/5.0) - 1.0 ) * (1e3)
-    beta_n  = (0.5)*exp((10.0 - v)/40.0) * (1e3)
+PROCEDURE rates(v (mV)) {
+    LOCAL vs
+    vs = v - vshift  : shifted voltage
+
+    alpha_n = (0.032)*(15.0 - vs) / ( exp((15.0 - vs)/5.0) - 1.0 )
+    beta_n  = (0.5)*exp((10.0 - vs)/40.0)
 }

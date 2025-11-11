@@ -26,24 +26,39 @@ soma.nseg = 1
 # 3. Insert channels (Na, K, leak)
 
 for sec in [soma]:
-    sec.insert("original_na")
-    sec.insert("original_k")
-    # sec.insert("pas")
+    # sec.insert("original_na")
+    # sec.insert("original_k")
+    sec.insert("original_ca")
+    sec.insert("original_kM")
+    # sec.insert("original_caT")
+    sec.insert("pas")
     for seg in sec:
-        seg.original_na.gnabar = 0.005      # S/cm²  (matches Python)
-        seg.original_k.gkbar = 0.05     # S/cm²
-        # seg.pas.g = 0.0001   # S/cm²
-        # seg.pas.e = -70      # mV
-        seg.ena = 50
-        seg.ek  = -90
+        seg.pas.g = 1e-8   # S/cm²
+        seg.pas.e = -70      # mV
+        
+        # seg.original_na.gnabar = 50e-3 # S/cm²
+        # seg.ena = 50
+        
+        # seg.original_k.gkbar = 5e-3 # S/cm²
+        # seg.ek = -90
 
+        seg.original_ca.gcabar = 1e-4 # S/cm²
+        seg.eca = 120
+
+        seg.original_kM.gMbar = 7.5e-5
+
+        # seg.original_caT.gTbar = 4.0e-2
+
+# V Threshold
+# soma(0.5).original_na.vshift = -20.0
+# soma(0.5).original_k.vshift = -20.0
 
 # 4. Stimulus (match Python’s total current)
 
 # Python: stimAmplitude = 0.15e-11 / soma_area (A/m²)
 # So total current = 0.15e-11 A = 0.015 nA
 
-I_total_nA = 0.15  # same total current
+I_total_nA = 0.0015
 stim_start = 50.0
 stim_end = 150.0
 
@@ -56,10 +71,10 @@ iclamp.amp = I_total_nA  # nA, same as Python total
 # 5. Simulation control
 h.v_init = 0
 tstop = 200
-h.dt = 0.05
+h.dt = 50e-3
 h.tstop = tstop
 h.finitialize(h.v_init)
-h.run()
+
 
 # 6. Record vectors
 
@@ -69,9 +84,16 @@ v_vec = h.Vector().record(soma(0.5)._ref_v)
 
 # 7. Run simulation
 
-h.finitialize(h.v_init)
 h.run()
 
+# 9. Save trace
+
+with open("../neuron_recordings/neuron_trace.csv", "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["t(ms)", "V(mV)"])
+    for t, v in zip(t_vec, v_vec):
+        writer.writerow([float(t), float(v)])
+print("Exported: neuron_recordings/neuron_trace.csv")
 
 # 8. Plot
 
@@ -85,11 +107,3 @@ plt.tight_layout()
 plt.show()
 
 
-# 9. Save trace
-
-with open("./neuron_recordings/neuron_trace.csv", "w", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerow(["t(ms)", "V(mV)"])
-    for t, v in zip(t_vec, v_vec):
-        writer.writerow([float(t), float(v)])
-print("Exported: neuron_recordings/neuron_trace.csv")

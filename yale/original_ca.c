@@ -269,10 +269,10 @@ static int _ode_spec1(_threadargsproto_);
 }
  
 static int  rates ( _threadargsprotocomma_ double _lv ) {
-   alpha_q = 0.055 * ( 27.0 - _lv ) / ( exp ( ( 27.0 - _lv ) / 3.8 ) - 1.0 ) * ( 1e3 ) ;
-   beta_q = 0.94 * exp ( ( - ( 75.0 + _lv ) ) / 17.0 ) * ( 1e3 ) ;
-   alpha_r = 0.000457 * exp ( ( - ( 13.0 + _lv ) ) / 50.0 ) * ( 1e3 ) ;
-   beta_r = 0.0065 / ( exp ( ( - ( 15.0 + _lv ) ) / 28.0 ) + 1.0 ) * ( 1e3 ) ;
+   alpha_q = 0.055 * ( - 27.0 - _lv ) / ( exp ( ( - 27.0 - _lv ) / 3.8 ) - 1.0 ) ;
+   beta_q = 0.94 * exp ( - ( 75.0 + _lv ) / 17.0 ) ;
+   alpha_r = 0.000457 * exp ( - ( 13.0 + _lv ) / 50.0 ) ;
+   beta_r = 0.0065 / ( exp ( - ( 15.0 + _lv ) / 28.0 ) + 1.0 ) ;
     return 0; }
  
 static void _hoc_rates(void) {
@@ -338,6 +338,11 @@ static void initmodel(double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt)
   int _i; double _save;{
   q = q0;
   r = r0;
+ {
+   rates ( _threadargscomma_ v ) ;
+   q = alpha_q / ( alpha_q + beta_q ) ;
+   r = alpha_r / ( alpha_r + beta_r ) ;
+   }
  
 }
 }
@@ -494,10 +499,10 @@ static const char* nmodl_file_text =
   "  eca = +120 mV\n"
   "  gating variables: q^2 * r\n"
   "\n"
-  " alpha_q(V)= 1e3 * 0.055*(27 - v)/( exp((27 - v)/3.8)-1 )\n"
-  " beta_q(V) = 1e3 * 0.94*exp((-(75 + v))/17)\n"
-  " alpha_r(V)= 1e3 * 0.000457*exp((-(13+ v))/50)\n"
-  " beta_r(V) = 1e3 * 0.0065 / [ exp((-(15+ v))/28)+1 ]\n"
+  "alpha_q(V) = 0.055*(27 - V) / (exp((27 - V)/3.8) - 1)\n"
+  "beta_q(V)  = 0.94*exp(-(75 + V)/17)\n"
+  "alpha_r(V) = 0.000457*exp(-(13 + V)/50)\n"
+  "beta_r(V)  = 0.0065 / (exp(-(15 + V)/28) + 1)\n"
   "ENDCOMMENT\n"
   "\n"
   "NEURON {\n"
@@ -519,7 +524,7 @@ static const char* nmodl_file_text =
   "}\n"
   "\n"
   "PARAMETER {\n"
-  "    gcabar = 0.01 (mS/cm2)  : from 1.0e1 => 0.01 S/cm^2\n"
+  "    gcabar = 0.01 (mS/cm2)\n"
   "}\n"
   "\n"
   "STATE {\n"
@@ -542,6 +547,12 @@ static const char* nmodl_file_text =
   "    ica = gcabar * (q*q) * r * (v - eca)\n"
   "}\n"
   "\n"
+  "INITIAL {\n"
+  "    rates(v)\n"
+  "    q = alpha_q / (alpha_q + beta_q)\n"
+  "    r = alpha_r / (alpha_r + beta_r)\n"
+  "}\n"
+  "\n"
   "DERIVATIVE states {\n"
   "    rates(v)\n"
   "    q' = alpha_q*(1 - q) - beta_q*q\n"
@@ -549,11 +560,11 @@ static const char* nmodl_file_text =
   "}\n"
   "\n"
   "PROCEDURE rates(v (mV)) {\n"
-  "    alpha_q = 0.055*(27.0 - v)/(exp((27.0 - v)/3.8)-1.0)*(1e3)\n"
-  "    beta_q  = 0.94*exp((-(75.0 + v))/17.0)*(1e3)\n"
+  "    alpha_q = 0.055*(-27.0 - v)/(exp((-27.0 - v)/3.8) - 1.0)\n"
+  "    beta_q  = 0.94 * exp(-(75.0 + v)/17.0)\n"
   "\n"
-  "    alpha_r = 0.000457*exp((-(13.0 + v))/50.0)*(1e3)\n"
-  "    beta_r  = 0.0065 /( exp((-(15.0 + v))/28.0)+1.0 )*(1e3)\n"
+  "    alpha_r = 0.000457 * exp(-(13.0 + v)/50.0)\n"
+  "    beta_r  = 0.0065 / ( exp(-(15.0 + v)/28.0) + 1.0 )\n"
   "}\n"
   ;
 #endif

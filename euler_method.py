@@ -5,12 +5,12 @@ import ion_channels as ch  # channels-only module
 # Section 1: Define variables
 
 # Channel toggles (choose what to integrate)
-USE_NA = True # m, h
-USE_K = True # n
-USE_LEAK = False
-USE_CaH = False  # q, r (high-threshold Ca) -- off here
+USE_NA = False # m, h
+USE_K = False # n
+USE_LEAK = True
+USE_CaH = True  # q, r (high-threshold Ca) -- off here
 USE_T = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
-USE_M = False # p (slow K / M-current)
+USE_M = True # p (slow K / M-current)
 
 # Membrane Capacitance
 C_m = 1.0e-2
@@ -149,6 +149,11 @@ if __name__ == "__main__":
     # Integrate the system
     t, Y = forward_euler(y0, dt, steps, rhs)
 
+    # Export time and voltage to CSV
+    export_data = np.column_stack((t * 1e3, Y[:, 0] * 1e3))  # time (ms), voltage (mV)
+    np.savetxt("./neuron_recordings/euler_trace.csv", export_data, delimiter=",", header="t(ms),V(mV)", comments='')
+    print("Exported: euler_trace.csv")
+
     # Plot voltage
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
     
@@ -173,7 +178,3 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.show()
 
-        # Export time and voltage to CSV
-    export_data = np.column_stack((t * 1e3, Y[:, 0] * 1e3))  # time (ms), voltage (mV)
-    np.savetxt("./neuron_recordings/euler_trace.csv", export_data, delimiter=",", header="t(ms),V(mV)", comments='')
-    print("Exported: euler_trace.csv")

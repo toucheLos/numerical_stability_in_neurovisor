@@ -17,10 +17,10 @@ def mV(V):
 G_DEFAULT = dict(
     gk   = 5.0e1,            # S/m^2
     gna  = 50.0e1,           # S/m^2
-    gl   = 1.0,   # S/m^2
-    gcaH = 0.000    1 * 1.0E4,   # S/m^2 (High-threshold Ca; "calcium_channel" in your C#)
+    gl   = 1.0e-4,   # S/m^2
+    gcaH = 1.0,   # S/m^2 (High-threshold Ca; "calcium_channel" in your C#)
     gM   = 7.5e-5 * 1.0e4,   # S/m^2 (Slow K / M-current; adjust as in your model)
-    gT   = 4.0e-4 * 1.0e4,   # S/m^2 (Low-threshold Ca, T-type)
+    gT   = 4.0e-2 * 1.0e4,   # S/m^2 (Low-threshold Ca, T-type)
 )
 
 # Reversal potentials (V)
@@ -79,11 +79,7 @@ def ca_high_rates(V):
     # Returns alpha_q, beta_q, alpha_r, beta_r [1/s].
     Vm = mV(V)
 
-    # alpha_q = 1e3 * 0.055 * (27 - V[mV]) / (exp((-27 - V)/3.8) - 1)
-    xq = (-27.0 - Vm)/3.8
-    aq = 1.0e3 * 0.055 * np.divide((27.0 - Vm), np.expm1(xq),
-                                   out=np.ones_like(Vm), where=(np.expm1(xq)!=0))
-
+    aq = 1.0e3 * 0.055 * (27 - Vm) / (np.exp((-27 - V)/3.8) - 1)
     bq = 1.0e3 * 0.94 * np.exp((-75.0 - Vm) / 17.0)
 
     ar = 1.0e3 * 0.000457 * np.exp((-13.0 - Vm) / 50.0)

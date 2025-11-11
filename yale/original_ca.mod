@@ -6,10 +6,10 @@ Matches "CalciumChannel" from your snippet:
   eca = +120 mV
   gating variables: q^2 * r
 
- alpha_q(V)= 1e3 * 0.055*(27 - v)/( exp((27 - v)/3.8)-1 )
- beta_q(V) = 1e3 * 0.94*exp((-(75 + v))/17)
- alpha_r(V)= 1e3 * 0.000457*exp((-(13+ v))/50)
- beta_r(V) = 1e3 * 0.0065 / [ exp((-(15+ v))/28)+1 ]
+alpha_q(V) = 0.055*(27 - V) / (exp((27 - V)/3.8) - 1)
+beta_q(V)  = 0.94*exp(-(75 + V)/17)
+alpha_r(V) = 0.000457*exp(-(13 + V)/50)
+beta_r(V)  = 0.0065 / (exp(-(15 + V)/28) + 1)
 ENDCOMMENT
 
 NEURON {
@@ -31,7 +31,7 @@ UNITS {
 }
 
 PARAMETER {
-    gcabar = 0.01 (mS/cm2)  : from 1.0e1 => 0.01 S/cm^2
+    gcabar = 0.01 (mS/cm2)
 }
 
 STATE {
@@ -54,6 +54,12 @@ BREAKPOINT {
     ica = gcabar * (q*q) * r * (v - eca)
 }
 
+INITIAL {
+    rates(v)
+    q = alpha_q / (alpha_q + beta_q)
+    r = alpha_r / (alpha_r + beta_r)
+}
+
 DERIVATIVE states {
     rates(v)
     q' = alpha_q*(1 - q) - beta_q*q
@@ -61,9 +67,9 @@ DERIVATIVE states {
 }
 
 PROCEDURE rates(v (mV)) {
-    alpha_q = 0.055*(27.0 - v)/(exp((27.0 - v)/3.8)-1.0)*(1e3)
-    beta_q  = 0.94*exp((-(75.0 + v))/17.0)*(1e3)
+    alpha_q = 0.055*(-27.0 - v)/(exp((-27.0 - v)/3.8) - 1.0)
+    beta_q  = 0.94 * exp(-(75.0 + v)/17.0)
 
-    alpha_r = 0.000457*exp((-(13.0 + v))/50.0)*(1e3)
-    beta_r  = 0.0065 /( exp((-(15.0 + v))/28.0)+1.0 )*(1e3)
+    alpha_r = 0.000457 * exp(-(13.0 + v)/50.0)
+    beta_r  = 0.0065 / ( exp(-(15.0 + v)/28.0) + 1.0 )
 }

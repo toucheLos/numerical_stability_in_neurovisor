@@ -47,22 +47,24 @@ extern double hoc_Exp(double);
 #define dt _nt->_dt
 #define gkbar _p[0]
 #define gkbar_columnindex 0
-#define ik _p[1]
-#define ik_columnindex 1
-#define n _p[2]
-#define n_columnindex 2
-#define Dn _p[3]
-#define Dn_columnindex 3
-#define ek _p[4]
-#define ek_columnindex 4
-#define alpha_n _p[5]
-#define alpha_n_columnindex 5
-#define beta_n _p[6]
-#define beta_n_columnindex 6
-#define v _p[7]
-#define v_columnindex 7
-#define _g _p[8]
-#define _g_columnindex 8
+#define vshift _p[1]
+#define vshift_columnindex 1
+#define ik _p[2]
+#define ik_columnindex 2
+#define n _p[3]
+#define n_columnindex 3
+#define Dn _p[4]
+#define Dn_columnindex 4
+#define ek _p[5]
+#define ek_columnindex 5
+#define alpha_n _p[6]
+#define alpha_n_columnindex 6
+#define beta_n _p[7]
+#define beta_n_columnindex 7
+#define v _p[8]
+#define v_columnindex 8
+#define _g _p[9]
+#define _g_columnindex 9
 #define _ion_ek	*_ppvar[0]._pval
 #define _ion_ik	*_ppvar[1]._pval
 #define _ion_dikdv	*_ppvar[2]._pval
@@ -124,6 +126,7 @@ extern void hoc_reg_nmodl_filename(int, const char*);
 };
  static HocParmUnits _hoc_parm_units[] = {
  "gkbar_original_k", "mS/cm2",
+ "vshift_original_k", "mV",
  "ik_original_k", "mA/cm2",
  0,0
 };
@@ -155,6 +158,7 @@ static void _ode_matsol(NrnThread*, _Memb_list*, int);
  "7.7.0",
 "original_k",
  "gkbar_original_k",
+ "vshift_original_k",
  0,
  "ik_original_k",
  0,
@@ -168,11 +172,12 @@ extern Prop* need_memb(Symbol*);
 static void nrn_alloc(Prop* _prop) {
 	Prop *prop_ion;
 	double *_p; Datum *_ppvar;
- 	_p = nrn_prop_data_alloc(_mechtype, 9, _prop);
+ 	_p = nrn_prop_data_alloc(_mechtype, 10, _prop);
  	/*initialize range parameters*/
- 	gkbar = 0.05;
+ 	gkbar = 0.5;
+ 	vshift = 0;
  	_prop->param = _p;
- 	_prop->param_size = 9;
+ 	_prop->param_size = 10;
  	_ppvar = nrn_prop_datum_alloc(_mechtype, 4, _prop);
  	_prop->dparam = _ppvar;
  	/*connect ionic variables to this model*/
@@ -209,7 +214,7 @@ extern void _cvode_abstol( Symbol**, double*, int);
   hoc_reg_nmodl_text(_mechtype, nmodl_file_text);
   hoc_reg_nmodl_filename(_mechtype, nmodl_filename);
 #endif
-  hoc_register_prop_size(_mechtype, 9, 4);
+  hoc_register_prop_size(_mechtype, 10, 4);
   hoc_register_dparam_semantics(_mechtype, 0, "k_ion");
   hoc_register_dparam_semantics(_mechtype, 1, "k_ion");
   hoc_register_dparam_semantics(_mechtype, 2, "k_ion");
@@ -222,7 +227,7 @@ extern void _cvode_abstol( Symbol**, double*, int);
  hoc_register_units(_mechtype, _hoc_parm_units);
  }
 static int _reset;
-static char *modelname = "Original Potassium Channel (Minimal)";
+static char *modelname = "Original Potassium Channel (Minimal, with vshift)";
 
 static int error;
 static int _ninits = 0;
@@ -256,8 +261,10 @@ static int _ode_spec1(_threadargsproto_);
 }
  
 static int  rates ( _threadargsprotocomma_ double _lv ) {
-   alpha_n = ( 0.032 ) * ( 15.0 - _lv ) / ( exp ( ( 15.0 - _lv ) / 5.0 ) - 1.0 ) * ( 1e3 ) ;
-   beta_n = ( 0.5 ) * exp ( ( 10.0 - _lv ) / 40.0 ) * ( 1e3 ) ;
+   double _lvs ;
+ _lvs = _lv - vshift ;
+   alpha_n = ( 0.032 ) * ( 15.0 - _lvs ) / ( exp ( ( 15.0 - _lvs ) / 5.0 ) - 1.0 ) ;
+   beta_n = ( 0.5 ) * exp ( ( 10.0 - _lvs ) / 40.0 ) ;
     return 0; }
  
 static void _hoc_rates(void) {
@@ -469,22 +476,24 @@ _first = 0;
 #if NMODL_TEXT
 static const char* nmodl_filename = "original_k.mod";
 static const char* nmodl_file_text = 
-  "TITLE Original Potassium Channel (Minimal)\n"
+  "TITLE Original Potassium Channel (Minimal, with vshift)\n"
   "\n"
   "COMMENT\n"
-  "Implements a basic Hodgkin-Huxley style K+ channel with:\n"
-  "  gKbar = 5.0e1 S/m^2 => 0.05 (mS/cm2)\n"
-  "  ek    = -90 mV\n"
-  "Gating variable n with exponent 4, using alpha_n / beta_n from your snippet:\n"
-  " alpha_n(V) = 1e3 * 0.032*(15 - V)/( exp((15-V)/5)-1 )\n"
-  " beta_n(V)  = 1e3 * 0.5*exp((10 - V)/40)\n"
+  "Implements a basic Hodgkin-Huxley style K+ channel with adjustable voltage shift.\n"
+  "\n"
+  "Original rate equations:\n"
+  "  alpha_n(V) = 1e3 * 0.032 * (15 - V) / (exp((15 - V)/5) - 1)\n"
+  "  beta_n(V)  = 1e3 * 0.5 * exp((10 - V)/40)\n"
+  "\n"
+  "Adding vshift -> use vs = v - vshift\n"
+  "\n"
+  "A positive vshift shifts activation rightward (requires more depolarization).\n"
   "ENDCOMMENT\n"
   "\n"
   "NEURON {\n"
   "    SUFFIX original_k\n"
   "    USEION k READ ek WRITE ik\n"
-  "    RANGE gkbar, ik\n"
-  "    RANGE n\n"
+  "    RANGE gkbar, ik, n, vshift\n"
   "}\n"
   "\n"
   "UNITS {\n"
@@ -499,7 +508,8 @@ static const char* nmodl_file_text =
   "}\n"
   "\n"
   "PARAMETER {\n"
-  "    gkbar = 0.05 (mS/cm2)   : from 5.0e1 S/m^2 => 0.05 S/cm^2\n"
+  "    gkbar = 0.5 (mS/cm2)\n"
+  "    vshift = 0 (mV)   : positive shifts activation to higher voltages\n"
   "}\n"
   "\n"
   "STATE {\n"
@@ -521,13 +531,15 @@ static const char* nmodl_file_text =
   "\n"
   "DERIVATIVE states {\n"
   "    rates(v)\n"
-  "    n' = alpha_n*(1 - n) - beta_n*n\n"
+  "    n' = alpha_n * (1 - n) - beta_n * n\n"
   "}\n"
   "\n"
-  "PROCEDURE rates(v(mV)) {\n"
-  "    : Direct from your snippet, no expansions\n"
-  "    alpha_n = (0.032)*(15.0 - v)/( exp((15.0 - v)/5.0) - 1.0 ) * (1e3)\n"
-  "    beta_n  = (0.5)*exp((10.0 - v)/40.0) * (1e3)\n"
+  "PROCEDURE rates(v (mV)) {\n"
+  "    LOCAL vs\n"
+  "    vs = v - vshift  : shifted voltage\n"
+  "\n"
+  "    alpha_n = (0.032)*(15.0 - vs) / ( exp((15.0 - vs)/5.0) - 1.0 )\n"
+  "    beta_n  = (0.5)*exp((10.0 - vs)/40.0)\n"
   "}\n"
   ;
 #endif

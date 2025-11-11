@@ -47,30 +47,32 @@ extern double hoc_Exp(double);
 #define dt _nt->_dt
 #define gnabar _p[0]
 #define gnabar_columnindex 0
-#define ina _p[1]
-#define ina_columnindex 1
-#define m _p[2]
-#define m_columnindex 2
-#define h _p[3]
-#define h_columnindex 3
-#define Dm _p[4]
-#define Dm_columnindex 4
-#define Dh _p[5]
-#define Dh_columnindex 5
-#define ena _p[6]
-#define ena_columnindex 6
-#define alpha_m _p[7]
-#define alpha_m_columnindex 7
-#define beta_m _p[8]
-#define beta_m_columnindex 8
-#define alpha_h _p[9]
-#define alpha_h_columnindex 9
-#define beta_h _p[10]
-#define beta_h_columnindex 10
-#define v _p[11]
-#define v_columnindex 11
-#define _g _p[12]
-#define _g_columnindex 12
+#define vshift _p[1]
+#define vshift_columnindex 1
+#define ina _p[2]
+#define ina_columnindex 2
+#define m _p[3]
+#define m_columnindex 3
+#define h _p[4]
+#define h_columnindex 4
+#define Dm _p[5]
+#define Dm_columnindex 5
+#define Dh _p[6]
+#define Dh_columnindex 6
+#define ena _p[7]
+#define ena_columnindex 7
+#define alpha_m _p[8]
+#define alpha_m_columnindex 8
+#define beta_m _p[9]
+#define beta_m_columnindex 9
+#define alpha_h _p[10]
+#define alpha_h_columnindex 10
+#define beta_h _p[11]
+#define beta_h_columnindex 11
+#define v _p[12]
+#define v_columnindex 12
+#define _g _p[13]
+#define _g_columnindex 13
 #define _ion_ena	*_ppvar[0]._pval
 #define _ion_ina	*_ppvar[1]._pval
 #define _ion_dinadv	*_ppvar[2]._pval
@@ -132,6 +134,7 @@ extern void hoc_reg_nmodl_filename(int, const char*);
 };
  static HocParmUnits _hoc_parm_units[] = {
  "gnabar_original_na", "mS/cm2",
+ "vshift_original_na", "mV",
  "ina_original_na", "mA/cm2",
  0,0
 };
@@ -164,6 +167,7 @@ static void _ode_matsol(NrnThread*, _Memb_list*, int);
  "7.7.0",
 "original_na",
  "gnabar_original_na",
+ "vshift_original_na",
  0,
  "ina_original_na",
  0,
@@ -178,11 +182,12 @@ extern Prop* need_memb(Symbol*);
 static void nrn_alloc(Prop* _prop) {
 	Prop *prop_ion;
 	double *_p; Datum *_ppvar;
- 	_p = nrn_prop_data_alloc(_mechtype, 13, _prop);
+ 	_p = nrn_prop_data_alloc(_mechtype, 14, _prop);
  	/*initialize range parameters*/
- 	gnabar = 0.6;
+ 	gnabar = 0.5;
+ 	vshift = 0;
  	_prop->param = _p;
- 	_prop->param_size = 13;
+ 	_prop->param_size = 14;
  	_ppvar = nrn_prop_datum_alloc(_mechtype, 4, _prop);
  	_prop->dparam = _ppvar;
  	/*connect ionic variables to this model*/
@@ -219,7 +224,7 @@ extern void _cvode_abstol( Symbol**, double*, int);
   hoc_reg_nmodl_text(_mechtype, nmodl_file_text);
   hoc_reg_nmodl_filename(_mechtype, nmodl_filename);
 #endif
-  hoc_register_prop_size(_mechtype, 13, 4);
+  hoc_register_prop_size(_mechtype, 14, 4);
   hoc_register_dparam_semantics(_mechtype, 0, "na_ion");
   hoc_register_dparam_semantics(_mechtype, 1, "na_ion");
   hoc_register_dparam_semantics(_mechtype, 2, "na_ion");
@@ -269,10 +274,12 @@ static int _ode_spec1(_threadargsproto_);
 }
  
 static int  rates ( _threadargsprotocomma_ double _lv ) {
-   alpha_m = ( 0.32 ) * ( 13.0 - _lv ) / ( exp ( ( 13.0 - _lv ) / 4.0 ) - 1.0 ) * ( 1e3 ) ;
-   beta_m = ( 0.28 ) * ( _lv - 40.0 ) / ( exp ( ( _lv - 40.0 ) / 5.0 ) - 1.0 ) * ( 1e3 ) ;
-   alpha_h = ( 0.128 ) * exp ( ( 17.0 - _lv ) / 18.0 ) * ( 1e3 ) ;
-   beta_h = ( 4.0 ) / ( exp ( ( 40.0 - _lv ) / 5.0 ) + 1.0 ) * ( 1e3 ) ;
+   double _lvs ;
+ _lvs = _lv - vshift ;
+   alpha_m = 0.32 * ( 13.0 - _lvs ) / ( exp ( ( 13.0 - _lvs ) / 4.0 ) - 1.0 ) ;
+   beta_m = 0.28 * ( _lvs - 40.0 ) / ( exp ( ( _lvs - 40.0 ) / 5.0 ) - 1.0 ) ;
+   alpha_h = 0.128 * exp ( ( 17.0 - _lvs ) / 18.0 ) ;
+   beta_h = 4.0 / ( exp ( ( 40.0 - _lvs ) / 5.0 ) + 1.0 ) ;
     return 0; }
  
 static void _hoc_rates(void) {
@@ -368,7 +375,7 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
 }
 
 static double _nrn_current(double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt, double _v){double _current=0.;v=_v;{ {
-   ina = gnabar * ( pow( m , 3.0 ) ) * h * ( v - ena ) ;
+   ina = gnabar * ( m * m * m ) * h * ( v - ena ) ;
    }
  _current += ina;
 
@@ -504,28 +511,23 @@ static const char* nmodl_file_text =
   "NEURON {\n"
   "    SUFFIX original_na\n"
   "    USEION na READ ena WRITE ina\n"
-  "    RANGE gnabar, ina\n"
+  "    RANGE gnabar, ina, vshift\n"
   "    RANGE m, h\n"
   "}\n"
   "\n"
   "UNITS {\n"
-  "    (mV)     = (millivolt)\n"
-  "    (mA)     = (milliamp)\n"
-  "    (mS)     = (millisiemens)\n"
-  "    (S)      = (siemens)\n"
-  "    (pA)     = (picoamp)\n"
-  "    (um)     = (micron)\n"
-  "    (mA/cm2) = (milliamp / square centimeter)\n"
-  "    (mS/cm2) = (millisiemens / square centimeter)\n"
+  "    (mV) = (millivolt)\n"
+  "    (mA) = (milliamp)\n"
+  "    (mS) = (millisiemens)\n"
   "}\n"
   "\n"
   "PARAMETER {\n"
-  "    gnabar = 0.60 (mS/cm2)   : from 60.0e1 => 0.60 S/cm^2\n"
+  "    gnabar = 0.5 (mS/cm2)\n"
+  "    vshift = 0 (mV) : positive shifts activation to more depolarized voltages\n"
   "}\n"
   "\n"
   "STATE {\n"
-  "    m\n"
-  "    h\n"
+  "    m h\n"
   "}\n"
   "\n"
   "ASSIGNED {\n"
@@ -540,7 +542,7 @@ static const char* nmodl_file_text =
   "\n"
   "BREAKPOINT {\n"
   "    SOLVE states METHOD cnexp\n"
-  "    ina = gnabar*(m^3)*h*(v - ena)\n"
+  "    ina = gnabar*(m*m*m)*h*(v - ena)\n"
   "}\n"
   "\n"
   "DERIVATIVE states {\n"
@@ -549,12 +551,16 @@ static const char* nmodl_file_text =
   "    h' = alpha_h*(1 - h) - beta_h*h\n"
   "}\n"
   "\n"
-  "PROCEDURE rates(v(mV)) {\n"
-  "    alpha_m = (0.32)*(13.0 - v)/( exp((13.0 - v)/4.0) - 1.0 )*(1e3)\n"
-  "    beta_m  = (0.28)*(v - 40.0)/( exp((v - 40.0)/5.0) - 1.0 )*(1e3)\n"
+  "PROCEDURE rates(v (mV)) {\n"
+  "    LOCAL vs\n"
+  "    vs = v - vshift\n"
   "\n"
-  "    alpha_h = (0.128)*exp((17.0 - v)/18.0)*(1e3)\n"
-  "    beta_h  = (4.0)/( exp((40.0 - v)/5.0)+1.0 )*(1e3)\n"
+  "    : Rates are in 1/ms (NEURON uses ms). NO *1e3 factor here.\n"
+  "    alpha_m = 0.32 * (13.0 - vs) / (exp((13.0 - vs)/4.0) - 1.0)\n"
+  "    beta_m  = 0.28 * (vs - 40.0) / (exp((vs - 40.0)/5.0) - 1.0)\n"
+  "\n"
+  "    alpha_h = 0.128 * exp((17.0 - vs)/18.0)\n"
+  "    beta_h  = 4.0 / (exp((40.0 - vs)/5.0) + 1.0)\n"
   "}\n"
   ;
 #endif
