@@ -79,7 +79,7 @@ def ca_high_rates(V):
     # Returns alpha_q, beta_q, alpha_r, beta_r [1/s].
     Vm = mV(V)
 
-    aq = 1.0e3 * 0.055 * (27 - Vm) / (np.exp((-27 - V)/3.8) - 1)
+    aq = 1.0e3 * 0.055 * (-27 - Vm) / (np.exp((-27 - V)/3.8) - 1)
     bq = 1.0e3 * 0.94 * np.exp((-75.0 - Vm) / 17.0)
 
     ar = 1.0e3 * 0.000457 * np.exp((-13.0 - Vm) / 50.0)

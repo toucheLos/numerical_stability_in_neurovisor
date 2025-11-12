@@ -6,7 +6,7 @@
 % Each has columns [time, voltage].
 
 disp("Starting voltage comparison script...");
-data1 = readmatrix("C:\Users\playtoe\Programs\neuron\neurovisor-current\Assets\CSV_Files\neuro_visor_recording_11-10-2025-12-18-08.csv");
+data1 = readmatrix("C:\Users\playtoe\Programs\neuron\numerical_stability_in_neurovisor\neuron_recordings\neuron_trace.csv");
 data2 = readmatrix("C:\Users\playtoe\Programs\neuron\numerical_stability_in_neurovisor\neuron_recordings\euler_trace.csv");
 
 

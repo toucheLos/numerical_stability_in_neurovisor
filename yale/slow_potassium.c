@@ -119,7 +119,7 @@ extern void hoc_reg_nmodl_filename(int, const char*);
 };
  /* declare global and static user variables */
 #define tmax tmax_original_kM
- double tmax = 400;
+ double tmax = 4000;
  /* some parameters have upper and lower limits */
  static HocParmLimits _hoc_parm_limits[] = {
  0,0,0
@@ -505,7 +505,7 @@ static const char* nmodl_file_text =
   "\n"
   "PARAMETER {\n"
   "    gMbar = 0.00075 (mS/cm2)\n"
-  "    tmax = 400 (ms)\n"
+  "    tmax = 4000 (ms)\n"
   "}\n"
   "\n"
   "STATE {\n"

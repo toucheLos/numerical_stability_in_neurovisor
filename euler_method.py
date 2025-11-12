@@ -5,10 +5,10 @@ import ion_channels as ch  # channels-only module
 # Section 1: Define variables
 
 # Channel toggles (choose what to integrate)
-USE_NA = False # m, h
-USE_K = False # n
-USE_LEAK = True
-USE_CaH = True  # q, r (high-threshold Ca) -- off here
+USE_NA = True # m, h
+USE_K = True # n
+USE_LEAK = False
+USE_CaH = False  # q, r (high-threshold Ca) -- off here
 USE_T = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
 USE_M = True # p (slow K / M-current)
 
@@ -130,7 +130,7 @@ def forward_euler(y0, dt, steps, rhs):
 if __name__ == "__main__":
     # Simulation settings
     T  = 200e-3 # seconds
-    dt = 50e-7 # seconds
+    dt = 50e-8 # seconds
     steps = int(round(T / dt))
     V0 = 0.0 # intial Voltage (in V)
 

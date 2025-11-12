@@ -499,7 +499,7 @@ static const char* nmodl_file_text =
   "  eca = +120 mV\n"
   "  gating variables: q^2 * r\n"
   "\n"
-  "alpha_q(V) = 0.055*(27 - V) / (exp((27 - V)/3.8) - 1)\n"
+  "alpha_q(V) = 0.055*(-27 - V) / (exp((27 - V)/3.8) - 1)\n"
   "beta_q(V)  = 0.94*exp(-(75 + V)/17)\n"
   "alpha_r(V) = 0.000457*exp(-(13 + V)/50)\n"
   "beta_r(V)  = 0.0065 / (exp(-(15 + V)/28) + 1)\n"

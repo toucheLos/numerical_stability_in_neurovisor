@@ -26,24 +26,24 @@ soma.nseg = 1
 # 3. Insert channels (Na, K, leak)
 
 for sec in [soma]:
-    # sec.insert("original_na")
-    # sec.insert("original_k")
-    sec.insert("original_ca")
+    sec.insert("original_na")
+    sec.insert("original_k")
+    # sec.insert("original_ca")
     sec.insert("original_kM")
     # sec.insert("original_caT")
-    sec.insert("pas")
+    # sec.insert("pas")
     for seg in sec:
-        seg.pas.g = 1e-8   # S/cm²
-        seg.pas.e = -70      # mV
+        # seg.pas.g = 1e-8   # S/cm²
+        # seg.pas.e = -70      # mV
         
-        # seg.original_na.gnabar = 50e-3 # S/cm²
-        # seg.ena = 50
+        seg.original_na.gnabar = 50e-3 # S/cm²
+        seg.ena = 50
         
-        # seg.original_k.gkbar = 5e-3 # S/cm²
-        # seg.ek = -90
+        seg.original_k.gkbar = 5e-3 # S/cm²
+        seg.ek = -90
 
-        seg.original_ca.gcabar = 1e-4 # S/cm²
-        seg.eca = 120
+        # seg.original_ca.gcabar = 1e-4 # S/cm²
+        # seg.eca = 120
 
         seg.original_kM.gMbar = 7.5e-5
 

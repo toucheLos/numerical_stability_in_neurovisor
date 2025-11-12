@@ -30,7 +30,7 @@ UNITS {
 
 PARAMETER {
     gMbar = 0.00075 (mS/cm2)
-    tmax = 400 (ms)
+    tmax = 4000 (ms)
 }
 
 STATE {

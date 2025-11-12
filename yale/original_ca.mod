@@ -6,7 +6,7 @@ Matches "CalciumChannel" from your snippet:
   eca = +120 mV
   gating variables: q^2 * r
 
-alpha_q(V) = 0.055*(27 - V) / (exp((27 - V)/3.8) - 1)
+alpha_q(V) = 0.055*(-27 - V) / (exp((27 - V)/3.8) - 1)
 beta_q(V)  = 0.94*exp(-(75 + V)/17)
 alpha_r(V) = 0.000457*exp(-(13 + V)/50)
 beta_r(V)  = 0.0065 / (exp(-(15 + V)/28) + 1)
