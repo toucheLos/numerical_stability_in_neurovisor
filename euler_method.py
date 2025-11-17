@@ -9,8 +9,8 @@ USE_NA = True # m, h
 USE_K = True # n
 USE_LEAK = False
 USE_CaH = False  # q, r (high-threshold Ca) -- off here
-USE_T = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
-USE_M = True # p (slow K / M-current)
+USE_T = True # u (T-type Ca). s_inf is instantaneous and NOT integrated.
+USE_M = False # p (slow K / M-current)
 
 # Membrane Capacitance
 C_m = 1.0e-2
@@ -130,7 +130,7 @@ def forward_euler(y0, dt, steps, rhs):
 if __name__ == "__main__":
     # Simulation settings
     T  = 200e-3 # seconds
-    dt = 50e-8 # seconds
+    dt = 50e-7 # seconds
     steps = int(round(T / dt))
     V0 = 0.0 # intial Voltage (in V)
 
