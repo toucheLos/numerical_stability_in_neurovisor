@@ -132,19 +132,26 @@ if __name__ == "__main__":
     T  = 200e-3 # seconds
     dt = 50e-7 # seconds
     steps = int(round(T / dt))
-    V0 = 0.0 # intial Voltage (in V)
+    V0 = -0.06 # intial Voltage (in V)
 
     # m, n, h, p, q, u, r = gates
     y0 = np.array([
         V0,
-        0.0147567 if USE_NA else 0.0, # m
-        0.0376969 if USE_K else 0.0, # n
-        0.9959410 if USE_NA else 0.0, # h
-        0.02 if USE_M  else 0.0, # p
-        0.02, # q
-        0.012 if USE_T else 0.0, # u
-        0.01 #r
+        # 0.0147567 if USE_NA else 0.0, # m
+        # 0.0376969 if USE_K else 0.0, # n
+        # 0.9959410 if USE_NA else 0.0, # h
+        ch.init_m(V0) if USE_NA else 0.0, # m
+        ch.init_n(V0) if USE_K else 0.0, # n
+        ch.init_h(V0) if USE_NA else 0.0, # h
+        ch.init_p(V0) if USE_M  else 0.0, # p
+        ch.init_q(V0) if USE_CaH else 0.0, # q
+        ch.init_u(V0) if USE_T else 0.0, # u
+        ch.init_r(V0) if USE_CaH else 0.0 #r
     ], dtype=float)
+
+    labels = ["V", "m", "n", "h", "p", "q", "u", "r"]
+    for name, value in zip(labels, y0):
+        print(f"{name}0 = {value}")
 
     # Integrate the system
     t, Y = forward_euler(y0, dt, steps, rhs)

@@ -44,6 +44,10 @@ def k_rates(V, vT_mV=V_SHIFTS['vT']):
     b = 1.0e3 * 0.5 * np.exp(-(Vm - vT - 10.0)/40.0)
     return a, b
 
+def init_n(V):
+    a, b = k_rates(V)
+    return a / (a + b)
+
 def k_current(V, n, gk=G_DEFAULT['gk'], Ek=E_DEFAULT['Ek']):
     # I_K = gk * n^4 * (V - Ek)
     return gk * (n**4) * (V - Ek)
@@ -62,6 +66,14 @@ def na_rates(V, vT_mV=V_SHIFTS['vT']):
     bh = 1.0e3 * 4.0 / (1.0 + np.exp(-(Vm - vT - 40.0)/5.0))
 
     return am, bm, ah, bh
+
+def init_m(V):
+    am, bm, _, _ = na_rates(V)
+    return am / (am + bm)
+
+def init_h(V):
+    _, _, ah, bh = na_rates(V)
+    return ah / (ah + bh)
  
 def na_current(V, m, h, gna=G_DEFAULT['gna'], Ena=E_DEFAULT['Ena']):
     # I_Na = gna * m^3 * h * (V - Ena).
@@ -87,6 +99,14 @@ def ca_high_rates(V):
 
     return aq, bq, ar, br
 
+def init_q(V):
+    aq, bq, _, _ = ca_high_rates(V)
+    return aq / (aq + bq)
+
+def init_r(V):
+    _, _, ar, br = ca_high_rates(V)
+    return ar / (ar + br)
+
 def ca_high_current(V, q, r, gca=G_DEFAULT['gcaH'], Eca=E_DEFAULT['Eca']):
     # I_Ca(H) = gca * q^2 * r * (V - Eca)
     return gca * (q**2) * r * (V - Eca)
@@ -110,6 +130,9 @@ def m_alpha_beta(V, tmax=4):
     a = np.divide(pinf, tau, out=np.zeros_like(pinf), where=(tau!=0))
     b = np.divide(1.0 - pinf, tau, out=np.zeros_like(pinf), where=(tau!=0))
     return a, b
+
+def init_p(V):
+    return m_p_inf(V) / (m_p_inf(V) + m_tau_p(V))
 
 def m_current(V, p, gM=G_DEFAULT['gM'], Ek=E_DEFAULT['Ek']):
     # I_M = gM * p * (V - Ek)
@@ -141,6 +164,10 @@ def t_alpha_beta_u(V, Vx_mV=V_SHIFTS['Vx']):
     a = np.divide(ui, tau, out=np.zeros_like(ui), where=(tau!=0))
     b = np.divide(1.0 - ui, tau, out=np.zeros_like(ui), where=(tau!=0))
     return a, b
+
+def init_u(V):
+    u_inf = t_u_inf(V)
+    return u_inf / (u_inf + t_tau_u(V))
 
 def t_current(V, u, gT=G_DEFAULT['gT'], Eca=E_DEFAULT['Eca'], Vx_mV=V_SHIFTS['Vx']):
     """I_T = gT * [s_inf(V)]^2 * u * (V - Eca).  (s is instantaneous)"""
