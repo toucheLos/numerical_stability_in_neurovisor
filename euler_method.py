@@ -7,10 +7,10 @@ import ion_channels as ch  # channels-only module
 # Channel toggles (choose what to integrate)
 USE_NA = True # m, h
 USE_K = True # n
-USE_LEAK = False
+USE_LEAK = True
 USE_CaH = False  # q, r (high-threshold Ca) -- off here
 USE_T = True # u (T-type Ca). s_inf is instantaneous and NOT integrated.
-USE_M = False # p (slow K / M-current)
+USE_M = True # p (slow K / M-current)
 
 # Membrane Capacitance
 C_m = 1.0e-2
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     T  = 200e-3 # seconds
     dt = 50e-7 # seconds
     steps = int(round(T / dt))
-    V0 = -0.06 # intial Voltage (in V)
+    V0 = 0.00 # intial Voltage (in V)
 
     # m, n, h, p, q, u, r = gates
     y0 = np.array([
