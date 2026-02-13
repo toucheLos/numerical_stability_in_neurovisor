@@ -29,8 +29,8 @@ for sec in [soma]:
     sec.insert("original_na")
     sec.insert("original_k")
     # sec.insert("original_ca")
-    # sec.insert("original_kM")
-    # sec.insert("original_caT")
+    sec.insert("original_kM")
+    sec.insert("original_caT")
     sec.insert("pas")
     for seg in sec:
         seg.pas.g = 1e-8   # S/cm²
@@ -43,11 +43,11 @@ for sec in [soma]:
         seg.ek = -90
 
         # seg.original_ca.gcabar = 1e-4 # S/cm²
-        # seg.eca = 120
+        seg.eca = 120
 
-        # seg.original_kM.gMbar = 7.5e-5
+        seg.original_kM.gMbar = 7.5e-5
 
-        # seg.original_caT.gTbar = 4.0e-2
+        seg.original_caT.gTbar = 4.0e-2
 
 # V Threshold
 # soma(0.5).original_na.vshift = -20.0
