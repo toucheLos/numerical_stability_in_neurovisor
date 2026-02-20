@@ -28,7 +28,7 @@ def I_stim(t):
     stimAmplitude = 0.15e-11 / soma_area
     # print("stimAmp = " + str(stimAmplitude))
     # return 0.0
-    return stimAmplitude if (50e-3 <= t < 150e-3) else 0.0
+    return stimAmplitude if (50e-3 <= t < 350e-3) else 0.0
 
 # import math
 # r_um = 33.5       # µm

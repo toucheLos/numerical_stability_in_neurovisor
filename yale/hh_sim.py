@@ -67,7 +67,7 @@ for sec in [soma]:
         sec.insert("original_caT")
         for seg in sec:
             seg.original_caT.gTbar = 4.0e-2
-# 
+
 # V Threshold
 # soma(0.5).original_na.vshift = -20.0
 # soma(0.5).original_k.vshift = -20.0
@@ -79,7 +79,7 @@ for sec in [soma]:
 
 I_total_nA = 0.0015
 stim_start = 50.0
-stim_end = 150.0
+stim_end = 350.0
 
 iclamp = h.IClamp(soma(0.5))
 iclamp.delay = stim_start
