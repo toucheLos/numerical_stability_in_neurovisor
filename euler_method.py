@@ -8,9 +8,9 @@ import ion_channels as ch  # channels-only module
 USE_NA = True # m, h
 USE_K = True # n
 USE_LEAK = True
-USE_CaH = True  # q, r (high-threshold Ca)
-USE_T = True # u (T-type Ca). s_inf is instantaneous and NOT integrated.
-USE_M = True # p (slow K / M-current)
+USE_CaH = False  # q, r (high-threshold Ca)
+USE_T = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
+USE_M = False # p (slow K / M-current)
 
 # Membrane Capacitance
 C_m = 1.0e-2
@@ -164,8 +164,26 @@ if __name__ == "__main__":
 
     # Export time and voltage to CSV
     export_data = np.column_stack((t * 1e3, Y[:, 0] * 1e3))  # time (ms), voltage (mV)
-    np.savetxt("./neuron_recordings/euler_trace.csv", export_data, delimiter=",", header="t(ms),V(mV)", comments='')
-    print("Exported: euler_trace.csv")
+    channels = []
+    if USE_NA:   channels.append("na")
+    if USE_K:    channels.append("k")
+    if USE_LEAK: channels.append("leak")
+    if USE_CaH:  channels.append("highca")
+    if USE_T:    channels.append("lowca")
+    if USE_M:    channels.append("slowk")
+
+    filename = f"./neuron_recordings/{'_'.join(channels)}.csv"
+    # filename = "./neuron_recordings/euler_trace.csv"
+
+    np.savetxt(
+        filename,
+        export_data,
+        delimiter=",",
+        header="t(ms),V(mV)",
+        comments=''
+    )
+
+    print(f"Exported: {filename}")
 
     # Plot voltage
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))

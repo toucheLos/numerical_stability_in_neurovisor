@@ -1,0 +1,56 @@
+cal_custom.cpp: ../cal_custom.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "cal_custom.mod"  -o "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64" )
+
+./cal_custom.o: cal_custom.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<\\n"
+	$(CXXCOMPILE) -I".." $(INCLUDES) -fPIC -c "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<" -o $@
+
+kna_custom.cpp: ../kna_custom.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "kna_custom.mod"  -o "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64" )
+
+./kna_custom.o: kna_custom.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<\\n"
+	$(CXXCOMPILE) -I".." $(INCLUDES) -fPIC -c "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<" -o $@
+
+low_calcium.cpp: ../low_calcium.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "low_calcium.mod"  -o "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64" )
+
+./low_calcium.o: low_calcium.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<\\n"
+	$(CXXCOMPILE) -I".." $(INCLUDES) -fPIC -c "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<" -o $@
+
+original_ca.cpp: ../original_ca.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "original_ca.mod"  -o "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64" )
+
+./original_ca.o: original_ca.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<\\n"
+	$(CXXCOMPILE) -I".." $(INCLUDES) -fPIC -c "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<" -o $@
+
+original_k.cpp: ../original_k.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "original_k.mod"  -o "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64" )
+
+./original_k.o: original_k.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<\\n"
+	$(CXXCOMPILE) -I".." $(INCLUDES) -fPIC -c "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<" -o $@
+
+original_na.cpp: ../original_na.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "original_na.mod"  -o "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64" )
+
+./original_na.o: original_na.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<\\n"
+	$(CXXCOMPILE) -I".." $(INCLUDES) -fPIC -c "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<" -o $@
+
+slow_potassium.cpp: ../slow_potassium.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "slow_potassium.mod"  -o "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64" )
+
+./slow_potassium.o: slow_potassium.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<\\n"
+	$(CXXCOMPILE) -I".." $(INCLUDES) -fPIC -c "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/arm64/$<" -o $@
+

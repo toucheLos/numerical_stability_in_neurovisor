@@ -56,7 +56,7 @@ fprintf('RMSE   = %.6f mV\n', rmseVal);
 
 % 4) Plot
 figure('Name','Voltage Comparison','Color','white');
-subplot(2,1,1,'Position',[0.05 0.55 0.9 0.4]);9
+subplot(2,1,1,'Position',[0.05 0.55 0.9 0.4]);
 plot(t_ya, v_ya, 'b-', 'LineWidth',1.5); hold on;
 plot(t_ya, v_nv_interp, 'r--', 'LineWidth',1.2);
 xlabel('Time (ms)'); ylabel('Voltage (mV)');
