@@ -46,6 +46,11 @@ ASSIGNED {
     beta_n  (1/ms)
 }
 
+INITIAL {
+    rates(v)
+    n = alpha_n / (alpha_n + beta_n)
+}
+
 BREAKPOINT {
     SOLVE states METHOD cnexp
     ik = gkbar * n^4 * (v - ek)

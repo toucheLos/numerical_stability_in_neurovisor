@@ -29,26 +29,26 @@ for sec in [soma]:
     sec.insert("original_na")
     sec.insert("original_k")
     # sec.insert("original_ca")
-    # sec.insert("original_kM")
+    sec.insert("original_kM")
     sec.insert("original_caT")
-    # sec.insert("pas")
+    sec.insert("pas") # Leakage
     for seg in sec:
-        # seg.pas.g = 1e-8   # S/cm²
-        # seg.pas.e = -70      # mV
-        
+        seg.pas.g = 1e-8   # S/cm²
+        seg.pas.e = -70      # mV
+
         seg.original_na.gnabar = 50e-3 # S/cm²
         seg.ena = 50
         
         seg.original_k.gkbar = 5e-3 # S/cm²
         seg.ek = -90
 
-        seg.original_ca.gcabar = 1e-4 # S/cm²
-        seg.eca = 120
+        # seg.original_ca.gcabar = 1e-4 # S/cm²
+        # seg.eca = 120
 
-        # seg.original_kM.gMbar = 7.5e-5
+        seg.original_kM.gMbar = 7.5e-5
 
-        # seg.original_caT.gTbar = 4.0e-2
-
+        seg.original_caT.gTbar = 4.0e-2
+# 
 # V Threshold
 # soma(0.5).original_na.vshift = -20.0
 # soma(0.5).original_k.vshift = -20.0
@@ -71,9 +71,26 @@ iclamp.amp = I_total_nA  # nA, same as Python total
 # 5. Simulation control
 h.v_init = 0
 tstop = 200
-h.dt = 50e-4
+h.dt = 50e-5
 h.tstop = tstop
 h.finitialize(h.v_init)
+
+# print initial gating values (after initialization, before h.run())
+print("Initial gating values:")
+for sec in [soma]:
+    for seg in sec:
+        print(" Section:", sec.name(), " seg:", seg.x)
+        if hasattr(seg, "original_na"):
+            print("  original_na m,h:", float(seg.original_na.m), float(seg.original_na.h))
+        if hasattr(seg, "original_k"):
+            print("  original_k n:", float(seg.original_k.n))
+        if hasattr(seg, "original_kM"):
+            print("  original_kM p (or other):", float(seg.original_kM.p))  # replace 'w' with actual name
+        if hasattr(seg, "original_caT"):
+            print("  original_caT u:", float(seg.original_caT.u))
+        if hasattr(seg, "original_ca"):
+            print("  original_ca r:", float(seg.original_ca.r))  # replace 'x' with actual name
+            print("  original_ca q:", float(seg.original_ca.q))  # replace 'x' with actual name
 
 
 # 6. Record vectors

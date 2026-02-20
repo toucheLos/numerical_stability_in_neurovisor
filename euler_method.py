@@ -7,10 +7,10 @@ import ion_channels as ch  # channels-only module
 # Channel toggles (choose what to integrate)
 USE_NA = True # m, h
 USE_K = True # n
-USE_LEAK = False
-USE_CaH = False  # q, r (high-threshold Ca) -- off here
+USE_LEAK = True
+USE_CaH = True  # q, r (high-threshold Ca)
 USE_T = True # u (T-type Ca). s_inf is instantaneous and NOT integrated.
-USE_M = False # p (slow K / M-current)
+USE_M = True # p (slow K / M-current)
 
 # Membrane Capacitance
 C_m = 1.0e-2
@@ -28,7 +28,6 @@ def I_stim(t):
     stimAmplitude = 0.15e-11 / soma_area
     # print("stimAmp = " + str(stimAmplitude))
     # return 0.0
-    # return 0.03149 if (50e-3 <= t < 100e-3) else 0.0
     return stimAmplitude if (50e-3 <= t < 150e-3) else 0.0
 
 # import math
@@ -129,10 +128,10 @@ def forward_euler(y0, dt, steps, rhs):
 
 if __name__ == "__main__":
     # Simulation settings
-    T  = 200e-3 # seconds
+    T  = 500e-3 # seconds
     dt = 50e-7 # seconds
     steps = int(round(T / dt))
-    V0 = -0.06 # intial Voltage (in V)
+    V0 = 0.0 # intial Voltage (in V)
 
     # m, n, h, p, q, u, r = gates
     y0 = np.array([
@@ -140,13 +139,20 @@ if __name__ == "__main__":
         # 0.0147567 if USE_NA else 0.0, # m
         # 0.0376969 if USE_K else 0.0, # n
         # 0.9959410 if USE_NA else 0.0, # h
+        # 0.0 if USE_M  else 0.0, # p
+        # 0.9923841297007807 if USE_CaH else 0.0, # q
+        # 0.0 if USE_T else 0.0, # u
+        # 0.07913696365923109 if USE_CaH else 0.0 # r
+
         ch.init_m(V0) if USE_NA else 0.0, # m
         ch.init_n(V0) if USE_K else 0.0, # n
         ch.init_h(V0) if USE_NA else 0.0, # h
         ch.init_p(V0) if USE_M  else 0.0, # p
+        # 0.0 if USE_M  else 0.0, # p
         ch.init_q(V0) if USE_CaH else 0.0, # q
         ch.init_u(V0) if USE_T else 0.0, # u
-        ch.init_r(V0) if USE_CaH else 0.0 #r
+        ch.init_r(V0) if USE_CaH else 0.0 # r
+
     ], dtype=float)
 
     labels = ["V", "m", "n", "h", "p", "q", "u", "r"]

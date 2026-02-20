@@ -345,6 +345,11 @@ static void initmodel(double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt)
   int _i; double _save;{
   h = h0;
   m = m0;
+ {
+   rates ( _threadargscomma_ v ) ;
+   m = alpha_m / ( alpha_m + beta_m ) ;
+   h = alpha_h / ( alpha_h + beta_h ) ;
+   }
  
 }
 }
@@ -538,6 +543,12 @@ static const char* nmodl_file_text =
   "    beta_m  (1/ms)\n"
   "    alpha_h (1/ms)\n"
   "    beta_h  (1/ms)\n"
+  "}\n"
+  "\n"
+  "INITIAL {\n"
+  "    rates(v)\n"
+  "    m = alpha_m / (alpha_m + beta_m)\n"
+  "    h = alpha_h / (alpha_h + beta_h)\n"
   "}\n"
   "\n"
   "BREAKPOINT {\n"

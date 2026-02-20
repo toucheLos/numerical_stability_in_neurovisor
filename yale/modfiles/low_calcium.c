@@ -328,6 +328,10 @@ static void _ode_matsol(NrnThread* _nt, _Memb_list* _ml, int _type) {
 static void initmodel(double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt) {
   int _i; double _save;{
   u = u0;
+ {
+   rates ( _threadargscomma_ v ) ;
+   u = u_inf ;
+   }
  
 }
 }
@@ -530,7 +534,10 @@ static const char* nmodl_file_text =
   "\n"
   "}\n"
   "\n"
-  "\n"
+  "INITIAL {\n"
+  "    rates(v)\n"
+  "    u = u_inf\n"
+  "}\n"
   "\n"
   "PARAMETER {\n"
   "\n"
@@ -597,6 +604,5 @@ static const char* nmodl_file_text =
   "    tau_u = (30.8 + 211.4 + exp((v + Vx + 113.2)/5.0)) / (3.7 * (1.0 + exp((v + Vx + 84.0)/3.2)))\n"
   "\n"
   "}\n"
-  "\n"
   ;
 #endif

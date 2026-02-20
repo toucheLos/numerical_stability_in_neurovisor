@@ -45,6 +45,12 @@ ASSIGNED {
     beta_h  (1/ms)
 }
 
+INITIAL {
+    rates(v)
+    m = alpha_m / (alpha_m + beta_m)
+    h = alpha_h / (alpha_h + beta_h)
+}
+
 BREAKPOINT {
     SOLVE states METHOD cnexp
     ina = gnabar*(m*m*m)*h*(v - ena)

@@ -91,7 +91,7 @@ def ca_high_rates(V):
     # Returns alpha_q, beta_q, alpha_r, beta_r [1/s].
     Vm = mV(V)
 
-    aq = 1.0e3 * 0.055 * (-27 - Vm) / (np.exp((-27 - V)/3.8) - 1)
+    aq = 1.0e3 * 0.055 * (-27 - Vm) / (np.exp((-27 - Vm)/3.8) - 1)
     bq = 1.0e3 * 0.94 * np.exp((-75.0 - Vm) / 17.0)
 
     ar = 1.0e3 * 0.000457 * np.exp((-13.0 - Vm) / 50.0)
@@ -132,7 +132,7 @@ def m_alpha_beta(V, tmax=4):
     return a, b
 
 def init_p(V):
-    return m_p_inf(V) / (m_p_inf(V) + m_tau_p(V))
+    return m_p_inf(V)
 
 def m_current(V, p, gM=G_DEFAULT['gM'], Ek=E_DEFAULT['Ek']):
     # I_M = gM * p * (V - Ek)
@@ -165,39 +165,10 @@ def t_alpha_beta_u(V, Vx_mV=V_SHIFTS['Vx']):
     b = np.divide(1.0 - ui, tau, out=np.zeros_like(ui), where=(tau!=0))
     return a, b
 
-def init_u(V):
-    u_inf = t_u_inf(V)
-    return u_inf / (u_inf + t_tau_u(V))
+def init_u(V, Vx_mV=V_SHIFTS['Vx']):
+    return t_u_inf(V, Vx_mV)
 
 def t_current(V, u, gT=G_DEFAULT['gT'], Eca=E_DEFAULT['Eca'], Vx_mV=V_SHIFTS['Vx']):
     """I_T = gT * [s_inf(V)]^2 * u * (V - Eca).  (s is instantaneous)"""
     s = t_s_inf(V, Vx_mV)
     return gT * (s**2) * u * (V - Eca)
-
-
-# Example usage
-if __name__ == "__main__":
-    # Test at a few voltages
-    V = np.array([-0.070, -0.050, -0.030])  # V
-
-    # K
-    an, bn = k_rates(V)
-    print("K: alpha_n =", an, "beta_n =", bn)
-
-    # Na
-    am, bm, ah, bh = na_rates(V)
-    print("Na: alpha_m =", am, "beta_m =", bm, "alpha_h =", ah, "beta_h =", bh)
-
-    # High-threshold Ca
-    aq, bq, ar, br = ca_high_rates(V)
-    print("Ca-H: alpha_q =", aq, "beta_q =", bq, "alpha_r =", ar, "beta_r =", br)
-
-    # Slow K (M)
-    pinf = m_p_inf(V); taup = m_tau_p(V)
-    ap, bp = m_alpha_beta(V)
-    print("M: p_inf =", pinf, "tau_p =", taup, "alpha_p =", ap, "beta_p =", bp)
-
-    # Low-T Ca (T-type)
-    s_inf = t_s_inf(V); ui = t_u_inf(V); tauu = t_tau_u(V)
-    au, bu = t_alpha_beta_u(V)
-    print("T: s_inf =", s_inf, "u_inf =", ui, "tau_u =", tauu, "alpha_u =", au, "beta_u =", bu)

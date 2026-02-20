@@ -329,6 +329,10 @@ static void _ode_matsol(NrnThread* _nt, _Memb_list* _ml, int _type) {
 static void initmodel(double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt) {
   int _i; double _save;{
   n = n0;
+ {
+   rates ( _threadargscomma_ v ) ;
+   n = alpha_n / ( alpha_n + beta_n ) ;
+   }
  
 }
 }
@@ -522,6 +526,11 @@ static const char* nmodl_file_text =
   "    ik  (mA/cm2)\n"
   "    alpha_n (1/ms)\n"
   "    beta_n  (1/ms)\n"
+  "}\n"
+  "\n"
+  "INITIAL {\n"
+  "    rates(v)\n"
+  "    n = alpha_n / (alpha_n + beta_n)\n"
   "}\n"
   "\n"
   "BREAKPOINT {\n"

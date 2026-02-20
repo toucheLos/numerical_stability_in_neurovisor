@@ -52,7 +52,10 @@ UNITS {
 
 }
 
-
+INITIAL {
+    rates(v)
+    u = u_inf
+}
 
 PARAMETER {
 
@@ -119,4 +122,3 @@ PROCEDURE rates(v(mV)) {
     tau_u = (30.8 + 211.4 + exp((v + Vx + 113.2)/5.0)) / (3.7 * (1.0 + exp((v + Vx + 84.0)/3.2)))
 
 }
-
