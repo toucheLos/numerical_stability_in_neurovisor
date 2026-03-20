@@ -326,7 +326,7 @@ extern void _cvode_abstol( Symbol**, double*, int);
  	hoc_register_tolerance(_mechtype, _hoc_state_tol, &_atollist);
  
     hoc_register_var(hoc_scdoub, hoc_vdoub, hoc_intfunc);
- 	ivoc_help("help ?1 kna_custom /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/kna_custom.mod\n");
+ 	ivoc_help("help ?1 kna_custom /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/modfiles/kna_custom.mod\n");
  hoc_register_limits(_mechtype, _hoc_parm_limits);
  hoc_register_units(_mechtype, _hoc_parm_units);
  }
@@ -608,7 +608,7 @@ _first = 0;
 
 #if NMODL_TEXT
 static void register_nmodl_text_and_filename(int mech_type) {
-    const char* nmodl_filename = "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/kna_custom.mod";
+    const char* nmodl_filename = "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/modfiles/kna_custom.mod";
     const char* nmodl_file_text = 
   "COMMENT\n"
   "  kna_custom.mod\n"

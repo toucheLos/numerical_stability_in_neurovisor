@@ -1,69 +1,145 @@
 %% voltage_comparison.m
 % Compare two voltage traces in variables:
 %   nv_voltage_trace  [Nx2 double]
-%   yn_voltage_trace  [Mx2 double]
+%   eu_voltage_trace  [Mx2 double]
 %
 % Each has columns [time, voltage].
 
-disp("Starting voltage comparison script...");
-data1 = readmatrix("C:\Users\playtoe\Programs\neuron\neurovisor-current\Assets\CSV_Files\neuro_visor_recording_02-06-2026-11-43-24.csv");
-% data1 = readmatrix("C:\Users\playtoe\Desktop\subject_01_eyesclosed_after.csv");
-data2 = readmatrix("C:\Users\playtoe\Programs\neuron\numerical_stability_in_neurovisor\neuron_recordings\euler_trace.csv");
+% Path to neuron recordings
+recording_path = "neuron_recordings/";
 
+% Name your 8 configs explicitly so it’s obvious what’s being compared
+configs = [
+    "na_k_leak"
+    "na_k_leak_ca"
+    "na_k_leak_lowca"
+    "na_k_leak_slowk"
+    "na_k_leak_ca_lowca"
+    "na_k_leak_ca_slowk"
+    "na_k_leak_lowca_slowk"
+    "na_k_leak_ca_lowca_slowk"
+];
 
-% 1) Extract columns
-t_nv = data1(:,1);
-v_nv = data1(:,2);
+% Choose prefixes for files
+prefix1 = "yale_";
+prefix2 = "euler_";
 
-t_ya = data2(:,1);
-v_ya = data2(:,2);
+for c = 1:numel(configs)
+    cfg = configs(c); 
+    
+    % Build the two filepaths
+    file1 = recording_path + prefix1 + cfg + ".csv";
+    file2 = recording_path + prefix2 + cfg + ".csv";
 
-% 2) Interpolate
-v_nv_interp = interp1(t_nv, v_nv, t_ya, 'linear', 'extrap');
+    % Print what you're comparing (so logs are self-documenting)
+    disp("Comparing config: " + cfg);
+    disp("  data1 <- " + file1);
+    disp("  data2 <- " + file2);
 
-% 3) Differences & global stats
-diffVec = v_ya - v_nv_interp;
-rmseVal = sqrt(mean(diffVec.^2));
-fprintf('\n=== Comparison Stats ===\n');
-fprintf('RMSE (total) = %.6f mV\n', rmseVal);
+    % Load
+    if ~isfile(file1) || ~isfile(file2)
+        disp("  SKIP (missing one or both files)");
+        continue;
+    end
 
-% Quadrant RMSE + spike counts (4 equal time windows)
-thresh = 0;  % adjust as needed
-t_min = min(t_ya); t_max = max(t_ya);
-edges = linspace(t_min, t_max, 5);  % 4 intervals
+% data1 = readmatrix("C:\Users\playtoe\Programs\neuron\neurovisor-current\Assets\CSV_Files\neuro_visor_recording_02-06-2026-11-43-24.csv");
+% data1 = readmatrix("/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/neuron_recordings/yale_na_k_leak_ca.csv");
+% data2 = readmatrix("/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/neuron_recordings/euler_na_k_leak_ca.csv");
+    data1 = readmatrix(file1);
+    data2 = readmatrix(file2);
 
-fprintf('\n=== Per-Interval Stats ===\n');
-for q = 1:4
-    mask = t_ya >= edges(q) & t_ya < edges(q+1);
-    if q == 4, mask = t_ya >= edges(q) & t_ya <= edges(q+1); end  % include endpoint
-    qRMSE     = sqrt(mean(diffVec(mask).^2));
-    spikes_eu = sum(diff(v_ya(mask) > thresh) == 1);
-    spikes_nv = sum(diff(v_nv_interp(mask) > thresh) == 1);
-    fprintf('[%.1f–%.1f ms] RMSE=%.4f mV | Spikes(Euler)=%d | Spikes(Yale)=%d\n', ...
-        edges(q), edges(q+1), qRMSE, spikes_eu, spikes_nv);
-end
-fprintf('Total | RMSE=%.4f mV | Spikes(Euler)=%d | Spikes(Yale)=%d\n', ...
-    rmseVal, sum(diff(v_ya > thresh)==1), sum(diff(v_nv_interp > thresh)==1));
+    fprintf('\nStarting voltage comparison script...\n\n');
+    
+    % 1) Extract columns
+    t1 = data1(:,1); v1 = data1(:,2);
+    t2 = data2(:,1); v2 = data2(:,2);
+    
+    % 2) Interpolate
+    v1i = interp1(t1, v1, t2, 'linear', 'extrap');
+    
+    % 3) Differences & global stats
+    diffVec = v2 - v1i;
+    rmseVal = sqrt(mean(diffVec.^2));
+    
+    % Print RMSE if 0
+    if rmseVal == 0
+        rdisp("rmseVal is equal to 0.")
+    end
+    
+    % RMSE / Strength of Signal
+    % Diff between max of each spike
+    
+    edges = linspace(min(t2), max(t2), 5);
+    fprintf('\nInterval RMSE\n');
+    
+    for q = 1:4
+        if q < 4
+            mask = t2 >= edges(q) & t2 < edges(q+1);
+        else
+            mask = t2 >= edges(q) & t2 <= edges(q+1);
+        end
+    
+        qrmse = sqrt(mean(diffVec(mask).^2));
+    
+        fprintf('[%.1f–%.1f ms] RMSE = %.6f mV\n', ...
+            edges(q), edges(q+1), qrmse);
+    end
+    
+    % 4) Discover Peaks
+    % Peak indices via derivative sign change
+    thresh = 35;
 
-% 5) Print stats
-if rmseVal == 0
-    rdisp("mseVal is equal to 0.")
-end
-fprintf('\n=== Comparison Stats ===\n');
-% fprintf('MSE    = %.6f mV\n', mseVal);
-fprintf('RMSE   = %.6f mV\n', rmseVal);
-% fprintf('MaxDiff= %.6f mV\n', maxDiff);
+    dv1 = diff(v1i);
+    pk1 = find(dv1(1:end-1) >= 0 & dv1(2:end) < 0) + 1;
+    
+    dv2 = diff(v2);  
+    pk2 = find(dv2(1:end-1) >= 0 & dv2(2:end) < 0) + 1;  % handles plateaus    
 
-% 4) Plot
-figure('Name','Voltage Comparison','Color','white');
-subplot(2,1,1,'Position',[0.05 0.55 0.9 0.4]);
-plot(t_ya, v_ya, 'b-', 'LineWidth',1.5); hold on;
-plot(t_ya, v_nv_interp, 'r--', 'LineWidth',1.2);
-xlabel('Time (ms)'); ylabel('Voltage (mV)');
-title('Voltage Comparison');
-legend({'Euler','Yale'}, 'Location','best');
-grid on;
+    % filter out tiny peaks less that 0
+    
+    pk1 = pk1(v1i(pk1) > thresh);
+    pk2 = pk2(v2(pk2)  > thresh);
+    
+    sigTotal = max(v2) - min(v2);
+    nrmseTotal = rmseVal / sigTotal;
+    fprintf('RMSE = %.6f mV | nRMSE = %.6f (RMSE/max diff)\n', rmseVal, nrmseTotal);
 
-% fprintf('%.6f, %.6f', max(data2), min(data2));
+    % Peak times + simple time-alignment comparison (pair by order)
+    n = min(numel(pk1), numel(pk2));
+    tpk1 = t2(pk1(1:n));
+    tpk2 = t2(pk2(1:n));
+    
+    dt = tpk2 - tpk1;
+    rmse_dt = sqrt(mean(dt.^2));
+    max_abs_dt = max(abs(dt));
+    
+    fprintf('\nPeak Timing Comparison\n');
+    fprintf('Peaks found: Yale=%d, Euler=%d, Compared=%d\n', numel(pk1), numel(pk2), n);
+    fprintf('RMSE(|Δt|) = %.6f ms\n', rmse_dt);
+    fprintf('Max |Δt|   = %.6f ms\n', max_abs_dt);
+    
+    % Print first few peak pairs
+    kshow = min(10, n);
+    fprintf('\nFirst %d peak times (ms):\n', kshow);
+    for k = 1:kshow
+        fprintf('#%d: t1=%.6f, t2=%.6f, Δt=%.6f\n', k, tpk1(k), tpk2(k), dt(k));
+    end
+    
+    % 5) Plot
+    figure('Name',"Voltage Comparison: "+cfg,'Color','white');
+    plot(t2, v2, 'b-', 'LineWidth',1.2); hold on;
+    plot(t2, v1i,'r--','LineWidth',1.0);
+    xlabel('Time (ms)'); ylabel('Voltage (mV)');
+    title(cfg);
+    legend({'Yale','Euler'}, 'Location','best');
+    grid on;
+    
+    % fprintf('%.6f, %.6f', max(data2), min(data2));
+   
+    % Close current plot before computing the next plot and stats.
+    uiwait(gcf);
+    
+end    
 
-disp("Done with voltage comparison script.");
+% Count of spikes is amiss | fixed with threshold
+% Neuroscience metric : intraspike interval

@@ -265,7 +265,7 @@ extern void _cvode_abstol( Symbol**, double*, int);
  	hoc_register_tolerance(_mechtype, _hoc_state_tol, &_atollist);
  
     hoc_register_var(hoc_scdoub, hoc_vdoub, hoc_intfunc);
- 	ivoc_help("help ?1 original_caT /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/low_calcium.mod\n");
+ 	ivoc_help("help ?1 original_caT /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/modfiles/low_calcium.mod\n");
  hoc_register_limits(_mechtype, _hoc_parm_limits);
  hoc_register_units(_mechtype, _hoc_parm_units);
  }
@@ -400,6 +400,10 @@ static void _ode_matsol(_nrn_model_sorted_token const& _sorted_token, NrnThread*
 static void initmodel(_internalthreadargsproto_) {
   int _i; double _save;{
   u = u0;
+ {
+   rates ( _threadargscomma_ v ) ;
+   u = u_inf ;
+   }
  
 }
 }
@@ -519,7 +523,7 @@ _first = 0;
 
 #if NMODL_TEXT
 static void register_nmodl_text_and_filename(int mech_type) {
-    const char* nmodl_filename = "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/low_calcium.mod";
+    const char* nmodl_filename = "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/modfiles/low_calcium.mod";
     const char* nmodl_file_text = 
   "TITLE Original Low-Threshold Calcium Channel (T-type, Minimal)\n"
   "\n"
@@ -575,7 +579,10 @@ static void register_nmodl_text_and_filename(int mech_type) {
   "\n"
   "}\n"
   "\n"
-  "\n"
+  "INITIAL {\n"
+  "    rates(v)\n"
+  "    u = u_inf\n"
+  "}\n"
   "\n"
   "PARAMETER {\n"
   "\n"
@@ -642,7 +649,6 @@ static void register_nmodl_text_and_filename(int mech_type) {
   "    tau_u = (30.8 + 211.4 + exp((v + Vx + 113.2)/5.0)) / (3.7 * (1.0 + exp((v + Vx + 84.0)/3.2)))\n"
   "\n"
   "}\n"
-  "\n"
   ;
     hoc_reg_nmodl_filename(mech_type, nmodl_filename);
     hoc_reg_nmodl_text(mech_type, nmodl_file_text);

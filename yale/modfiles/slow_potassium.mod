@@ -45,12 +45,10 @@ ASSIGNED {
     tau_p (ms)
 }
 
-COMMENT
 INITIAL {
     rates(v)
     p = p_inf
 }
-ENDCOMMENT
 
 BREAKPOINT {
     SOLVE states METHOD cnexp

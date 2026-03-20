@@ -265,7 +265,7 @@ extern void _cvode_abstol( Symbol**, double*, int);
  	hoc_register_tolerance(_mechtype, _hoc_state_tol, &_atollist);
  
     hoc_register_var(hoc_scdoub, hoc_vdoub, hoc_intfunc);
- 	ivoc_help("help ?1 original_k /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/original_k.mod\n");
+ 	ivoc_help("help ?1 original_k /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/modfiles/original_k.mod\n");
  hoc_register_limits(_mechtype, _hoc_parm_limits);
  hoc_register_units(_mechtype, _hoc_parm_units);
  }
@@ -405,6 +405,10 @@ static void _ode_matsol(_nrn_model_sorted_token const& _sorted_token, NrnThread*
 static void initmodel(_internalthreadargsproto_) {
   int _i; double _save;{
   n = n0;
+ {
+   rates ( _threadargscomma_ v ) ;
+   n = alpha_n / ( alpha_n + beta_n ) ;
+   }
  
 }
 }
@@ -523,7 +527,7 @@ _first = 0;
 
 #if NMODL_TEXT
 static void register_nmodl_text_and_filename(int mech_type) {
-    const char* nmodl_filename = "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/original_k.mod";
+    const char* nmodl_filename = "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/modfiles/original_k.mod";
     const char* nmodl_file_text = 
   "TITLE Original Potassium Channel (Minimal, with vshift)\n"
   "\n"
@@ -571,6 +575,11 @@ static void register_nmodl_text_and_filename(int mech_type) {
   "    ik  (mA/cm2)\n"
   "    alpha_n (1/ms)\n"
   "    beta_n  (1/ms)\n"
+  "}\n"
+  "\n"
+  "INITIAL {\n"
+  "    rates(v)\n"
+  "    n = alpha_n / (alpha_n + beta_n)\n"
   "}\n"
   "\n"
   "BREAKPOINT {\n"

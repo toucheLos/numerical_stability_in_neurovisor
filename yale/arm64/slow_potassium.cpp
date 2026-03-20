@@ -262,7 +262,7 @@ extern void _cvode_abstol( Symbol**, double*, int);
  	hoc_register_tolerance(_mechtype, _hoc_state_tol, &_atollist);
  
     hoc_register_var(hoc_scdoub, hoc_vdoub, hoc_intfunc);
- 	ivoc_help("help ?1 original_kM /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/slow_potassium.mod\n");
+ 	ivoc_help("help ?1 original_kM /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/modfiles/slow_potassium.mod\n");
  hoc_register_limits(_mechtype, _hoc_parm_limits);
  hoc_register_units(_mechtype, _hoc_parm_units);
  }
@@ -515,7 +515,7 @@ _first = 0;
 
 #if NMODL_TEXT
 static void register_nmodl_text_and_filename(int mech_type) {
-    const char* nmodl_filename = "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/slow_potassium.mod";
+    const char* nmodl_filename = "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/modfiles/slow_potassium.mod";
     const char* nmodl_file_text = 
   "TITLE Original Slow Potassium (M-current, Minimal)\n"
   "\n"
@@ -563,6 +563,13 @@ static void register_nmodl_text_and_filename(int mech_type) {
   "    p_inf\n"
   "    tau_p (ms)\n"
   "}\n"
+  "\n"
+  "COMMENT\n"
+  "INITIAL {\n"
+  "    rates(v)\n"
+  "    p = p_inf\n"
+  "}\n"
+  "ENDCOMMENT\n"
   "\n"
   "BREAKPOINT {\n"
   "    SOLVE states METHOD cnexp\n"

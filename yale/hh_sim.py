@@ -28,10 +28,10 @@ soma.nseg = 1
 # Toggle channels on/off here:
 USE_NA = True
 USE_K = True
-USE_CA = False
-USE_KM = False
-USE_CAT = False
 USE_PAS = True
+USE_CA = False
+USE_CAT = False
+USE_KM = False
 
 for sec in [soma]:
     if USE_PAS:
@@ -62,11 +62,15 @@ for sec in [soma]:
         sec.insert("original_kM")
         for seg in sec:
             seg.original_kM.gMbar = 7.5e-5
+            if not USE_K:
+                seg.ek = -90
 
     if USE_CAT:
         sec.insert("original_caT")
         for seg in sec:
             seg.original_caT.gTbar = 4.0e-2
+            if not USE_CA:
+                seg.eca = 120
 
 # V Threshold
 # soma(0.5).original_na.vshift = -20.0
@@ -102,7 +106,7 @@ for sec in [soma]:
         if hasattr(seg, "original_na"):
             print("  original_na m,h:", float(seg.original_na.m), float(seg.original_na.h))
         if hasattr(seg, "original_k"):
-            print("  original_k n:", float(seg.original_k.n))
+            print(". original_k n:", float(seg.original_k.n))
         if hasattr(seg, "original_kM"):
             print("  original_kM p (or other):", float(seg.original_kM.p))  
         if hasattr(seg, "original_caT"):
@@ -122,19 +126,17 @@ v_vec = h.Vector().record(soma(0.5)._ref_v)
 
 h.run()
 
-# 9. Save trace
-
-# 9. Save trace
+# 8. Save trace
 
 channels = []
-if USE_NA:   channels.append("na")
-if USE_K:    channels.append("k")
-if USE_PAS:  channels.append("leak")
-if USE_CA:   channels.append("highca")
-if USE_CAT:  channels.append("lowca")
-if USE_KM:   channels.append("slowk")
+if USE_NA: channels.append("na")
+if USE_K: channels.append("k")
+if USE_PAS: channels.append("leak")
+if USE_CA: channels.append("ca")
+if USE_CAT: channels.append("lowca")
+if USE_KM: channels.append("slowk")
 
-filename = f"../neuron_recordings/{'_'.join(channels)}.csv"
+filename = f"../neuron_recordings/yale_{'_'.join(channels)}.csv"
 # filename = "../neuron_recordings/neuron_trace.csv"
 
 with open(filename, "w", newline="") as f:
@@ -145,7 +147,7 @@ with open(filename, "w", newline="") as f:
 
 print(f"Exported: {filename}")
 
-# 8. Plot
+# 9. Plot
 
 plt.figure(figsize=(9,6))
 plt.plot(t_vec, v_vec, 'k', linewidth=2)
@@ -155,5 +157,3 @@ plt.title("NEURON Simulation (Aligned with Python Euler)")
 plt.grid(alpha=0.3)
 plt.tight_layout()
 plt.show()
-
-

@@ -279,7 +279,7 @@ extern void _cvode_abstol( Symbol**, double*, int);
  	hoc_register_tolerance(_mechtype, _hoc_state_tol, &_atollist);
  
     hoc_register_var(hoc_scdoub, hoc_vdoub, hoc_intfunc);
- 	ivoc_help("help ?1 original_na /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/original_na.mod\n");
+ 	ivoc_help("help ?1 original_na /Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/modfiles/original_na.mod\n");
  hoc_register_limits(_mechtype, _hoc_parm_limits);
  hoc_register_units(_mechtype, _hoc_parm_units);
  }
@@ -425,6 +425,11 @@ static void initmodel(_internalthreadargsproto_) {
   int _i; double _save;{
   h = h0;
   m = m0;
+ {
+   rates ( _threadargscomma_ v ) ;
+   m = alpha_m / ( alpha_m + beta_m ) ;
+   h = alpha_h / ( alpha_h + beta_h ) ;
+   }
  
 }
 }
@@ -544,7 +549,7 @@ _first = 0;
 
 #if NMODL_TEXT
 static void register_nmodl_text_and_filename(int mech_type) {
-    const char* nmodl_filename = "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/original_na.mod";
+    const char* nmodl_filename = "/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/yale/modfiles/original_na.mod";
     const char* nmodl_file_text = 
   "TITLE Original Sodium Channel (Minimal)\n"
   "\n"
@@ -591,6 +596,12 @@ static void register_nmodl_text_and_filename(int mech_type) {
   "    beta_m  (1/ms)\n"
   "    alpha_h (1/ms)\n"
   "    beta_h  (1/ms)\n"
+  "}\n"
+  "\n"
+  "INITIAL {\n"
+  "    rates(v)\n"
+  "    m = alpha_m / (alpha_m + beta_m)\n"
+  "    h = alpha_h / (alpha_h + beta_h)\n"
   "}\n"
   "\n"
   "BREAKPOINT {\n"

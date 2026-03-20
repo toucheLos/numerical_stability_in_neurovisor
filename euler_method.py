@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import ion_channels as ch  # channels-only module
+from scipy.optimize import fsolve
 
 # Section 1: Define variables
 
@@ -44,6 +45,40 @@ def I_stim(t):
 # State vector layout: y = [m, n, h, p, q, u]
 # If a channel is OFF, we keep its derivative = 0 (state frozen).
 
+def resting_current(V):
+    V = float(np.atleast_1d(V)[0])
+
+    Im = 0.0
+
+    if USE_K:
+        n = ch.init_n(V)
+        Im += ch.k_current(V, n)
+
+    if USE_NA:
+        m = ch.init_m(V)
+        h = ch.init_h(V)
+        Im += ch.na_current(V, m, h)
+
+    if USE_LEAK:
+        Im += ch.leak_current(V)
+
+    if USE_CaH:
+        q = ch.init_q(V)
+        r = ch.init_r(V)
+        Im += ch.ca_high_current(V, q, r)
+
+    if USE_T:
+        u = ch.init_u(V)
+        Im += ch.t_current(V, u)
+
+    if USE_M:
+        p = ch.init_p(V)
+        Im += ch.m_current(V, p)
+
+    # print(Im)
+
+    return Im
+
 def rhs(y, t):
     # This is the RHS for gating variables at fixed voltage V
     # gates = [m, n, h, p, q, u, r]
@@ -72,8 +107,9 @@ def rhs(y, t):
         dr = (ar[0]*(1.0 - r) - br[0]*r)
 
     if USE_T:
-        au, bu = ch.t_alpha_beta_u(Vv)
-        du = (au[0]*(1.0 - u) - bu[0]*u)
+        # au, bu = ch.t_alpha_beta_u(Vv)
+        # du = (au[0]*(1.0 - u) - bu[0]*u)
+        du = ((ch.t_u_inf(Vv) - u) / ch.t_tau_u(Vv))[0]
         s = ch.t_s_inf(np.array([V]))[0] # instantaneous
 
 
@@ -92,8 +128,10 @@ def rhs(y, t):
     if USE_M:
         Im += ch.m_current(V, p)
 
-    Im_tot = Im / soma_area
+    # Im_tot = Im / soma_area
 
+    # C_m * dV = - Im + I_stim(t)
+    
     dV = (I_stim(t) - Im) / C_m
     # dV = (I_stim(t) - Im_tot) / C_tot
 
@@ -122,6 +160,8 @@ def forward_euler(y0, dt, steps, rhs):
     t[steps] = steps * dt
     return t, Y
 
+# Replace Euler with Runga Kutta
+
 # Section 5: Run the program
 
 # Change timesteps to capture convergence of a solution
@@ -131,7 +171,7 @@ if __name__ == "__main__":
     T  = 500e-3 # seconds
     dt = 50e-7 # seconds
     steps = int(round(T / dt))
-    V0 = 0.0 # intial Voltage (in V)
+    V0 = 0 # intial Voltage (in V)
 
     # m, n, h, p, q, u, r = gates
     y0 = np.array([
@@ -159,20 +199,25 @@ if __name__ == "__main__":
     for name, value in zip(labels, y0):
         print(f"{name}0 = {value}")
 
+    # Calculate resting potential
+    V_rest = fsolve(resting_current, V0)[0]
+    print(f"Resting Potential for the neuron = {V_rest} V ({V_rest*1e3} mV)")
+
+
     # Integrate the system
     t, Y = forward_euler(y0, dt, steps, rhs)
 
     # Export time and voltage to CSV
     export_data = np.column_stack((t * 1e3, Y[:, 0] * 1e3))  # time (ms), voltage (mV)
     channels = []
-    if USE_NA:   channels.append("na")
-    if USE_K:    channels.append("k")
+    if USE_NA: channels.append("na")
+    if USE_K: channels.append("k")
     if USE_LEAK: channels.append("leak")
-    if USE_CaH:  channels.append("highca")
-    if USE_T:    channels.append("lowca")
-    if USE_M:    channels.append("slowk")
+    if USE_CaH: channels.append("ca")
+    if USE_T: channels.append("lowca")
+    if USE_M: channels.append("slowk")
 
-    filename = f"./neuron_recordings/{'_'.join(channels)}.csv"
+    filename = f"../neuron_recordings/euler_{'_'.join(channels)}.csv"
     # filename = "./neuron_recordings/euler_trace.csv"
 
     np.savetxt(
@@ -208,4 +253,3 @@ if __name__ == "__main__":
     
     plt.tight_layout()
     plt.show()
-
