@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import itertools
 import ion_channels as ch  # channels-only module
 from scipy.optimize import fsolve
 
@@ -10,7 +11,7 @@ USE_NA = True # m, h
 USE_K = True # n
 USE_LEAK = True
 USE_CaH = False  # q, r (high-threshold Ca)
-USE_T = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
+USE_T = True # u (T-type Ca). s_inf is instantaneous and NOT integrated.
 USE_M = False # p (slow K / M-current)
 
 # Membrane Capacitance
@@ -28,8 +29,8 @@ C_tot = C_m * soma_area  # F (total capacitance)
 def I_stim(t):
     stimAmplitude = 0.15e-11 / soma_area
     # print("stimAmp = " + str(stimAmplitude))
-    # return 0.0
-    return stimAmplitude if (50e-3 <= t < 350e-3) else 0.0
+    return 0.0
+    # return stimAmplitude if (50e-3 <= t < 350e-3) else 0.0
 
 # import math
 # r_um = 33.5       # µm
@@ -45,37 +46,43 @@ def I_stim(t):
 # State vector layout: y = [m, n, h, p, q, u]
 # If a channel is OFF, we keep its derivative = 0 (state frozen).
 
-def resting_current(V):
+def resting_current(V, use_na=None, use_k=None, use_leak=None, use_cah=None, use_t=None, use_m=None):
+    # Fall back to global toggles if not specified
+    if use_na   is None: use_na   = USE_NA
+    if use_k    is None: use_k    = USE_K
+    if use_leak is None: use_leak = USE_LEAK
+    if use_cah  is None: use_cah  = USE_CaH
+    if use_t    is None: use_t    = USE_T
+    if use_m    is None: use_m    = USE_M
+
     V = float(np.atleast_1d(V)[0])
 
     Im = 0.0
 
-    if USE_K:
+    if use_k:
         n = ch.init_n(V)
         Im += ch.k_current(V, n)
 
-    if USE_NA:
+    if use_na:
         m = ch.init_m(V)
         h = ch.init_h(V)
         Im += ch.na_current(V, m, h)
 
-    if USE_LEAK:
+    if use_leak:
         Im += ch.leak_current(V)
 
-    if USE_CaH:
+    if use_cah:
         q = ch.init_q(V)
         r = ch.init_r(V)
         Im += ch.ca_high_current(V, q, r)
 
-    if USE_T:
+    if use_t:
         u = ch.init_u(V)
         Im += ch.t_current(V, u)
 
-    if USE_M:
+    if use_m:
         p = ch.init_p(V)
         Im += ch.m_current(V, p)
-
-    # print(Im)
 
     return Im
 
@@ -168,7 +175,7 @@ def forward_euler(y0, dt, steps, rhs):
 
 if __name__ == "__main__":
     # Simulation settings
-    T  = 500e-3 # seconds
+    T  = 50000e-3 # seconds
     dt = 50e-7 # seconds
     steps = int(round(T / dt))
     V0 = 0 # intial Voltage (in V)
@@ -199,10 +206,30 @@ if __name__ == "__main__":
     for name, value in zip(labels, y0):
         print(f"{name}0 = {value}")
 
-    # Calculate resting potential
-    V_rest = fsolve(resting_current, V0)[0]
-    print(f"Resting Potential for the neuron = {V_rest} V ({V_rest*1e3} mV)")
+    # # Calculate resting potential for all channel combinations
+    # ch_names = ["NA", "K", "LEAK", "CaH", "T", "M"]
+    # sweep_results = []
+    # print(f"\n{'Channels':<32} {'V_rest (mV)':>12}  Status")
+    # print("-" * 55)
+    # for combo in itertools.product([False, True], repeat=6):
+    #     use_na, use_k, use_leak, use_cah, use_t, use_m = combo
+    #     label = "_".join(n for n, on in zip(ch_names, combo) if on) or "NONE"
+    #     try:
+    #         sol, _, ier, _ = fsolve(
+    #             lambda V: resting_current(V, use_na, use_k, use_leak, use_cah, use_t, use_m),
+    #             -0.065, full_output=True
+    #         )
+    #         v = sol[0]
+    #         status = "OK" if ier == 1 else "NO CONV"
+    #     except Exception:
+    #         v, status = float('nan'), "ERROR"
+    #     sweep_results.append((label, v * 1e3, status))
+    #     print(f"{label:<32} {v*1e3:>12.3f}  {status}")
 
+    # # Resting potential for the currently-configured combination
+    # cur_label = "_".join(n for n, on in zip(ch_names, [USE_NA, USE_K, USE_LEAK, USE_CaH, USE_T, USE_M]) if on) or "NONE"
+    # V_rest = next(v for lbl, v, _ in sweep_results if lbl == cur_label) / 1e3
+    # print(f"\nActive config ({cur_label}): V_rest = {V_rest*1e3:.3f} mV")
 
     # Integrate the system
     t, Y = forward_euler(y0, dt, steps, rhs)
@@ -217,8 +244,8 @@ if __name__ == "__main__":
     if USE_T: channels.append("lowca")
     if USE_M: channels.append("slowk")
 
-    filename = f"../neuron_recordings/euler_{'_'.join(channels)}.csv"
-    # filename = "./neuron_recordings/euler_trace.csv"
+    # filename = f"~/Desktop/neuron/numerical_stability_in_neuurovisor/neuron_recordings/euler_{'_'.join(channels)}.csv"
+    filename = "../neuron_recordings/euler_trace.csv"
 
     np.savetxt(
         filename,
