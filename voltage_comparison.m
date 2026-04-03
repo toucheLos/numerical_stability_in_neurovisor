@@ -5,10 +5,14 @@
 %
 % Each has columns [time, voltage].
 
+% Storage for ISI's
+all_ISI = [];
+labels = [];
+
 % Path to neuron recordings
 recording_path = "neuron_recordings/";
 
-% Name your 8 configs explicitly so it’s obvious what’s being compared
+% Names for each ion channel config
 configs = [
     "na_k_leak"
     "na_k_leak_ca"
@@ -113,20 +117,83 @@ for c = 1:numel(configs)
     rmse_dt = sqrt(mean(dt.^2));
     max_abs_dt = max(abs(dt));
     
-    fprintf('\nPeak Timing Comparison\n');
-    fprintf('Peaks found: Yale=%d, Euler=%d, Compared=%d\n', numel(pk1), numel(pk2), n);
-    fprintf('RMSE(|Δt|) = %.6f ms\n', rmse_dt);
-    fprintf('Max |Δt|   = %.6f ms\n', max_abs_dt);
+    % fprintf('\nPeak Timing Comparison\n');
+    % fprintf('Peaks found: Yale=%d, Euler=%d, Compared=%d\n', numel(pk1), numel(pk2), n);
+    % fprintf('RMSE(|Δt|) = %.6f ms\n', rmse_dt);
+    % fprintf('Max |Δt|   = %.6f ms\n', max_abs_dt);
     
-    % Print first few peak pairs
-    kshow = min(10, n);
-    fprintf('\nFirst %d peak times (ms):\n', kshow);
-    for k = 1:kshow
-        fprintf('#%d: t1=%.6f, t2=%.6f, Δt=%.6f\n', k, tpk1(k), tpk2(k), dt(k));
-    end
+    %% Print first few peak pairs
+    % kshow = min(10, n);
+    % fprintf('\nFirst %d peak times (ms):\n', kshow);
+    % for k = 1:kshow
+    %     fprintf('#%d: t1=%.6f, t2=%.6f, Δt=%.6f\n', k, tpk1(k), tpk2(k), dt(k));
+    % end
+
+    % 5) Intraspike Interval
+
+    % Compute ISIs for both traces
+    isi1 = diff(tpk1);  % Yale ISIs (ms)
+    isi2 = diff(tpk2);  % Euler ISIs (ms)
+
+    % Store mean ISIs
+    all_ISI = [all_ISI; mean(isi1), mean(isi2)];
+    labels = [labels; cfg];
+
+    % Comparse ISIs of each program
+    isi_diff = isi2 - isi1;
+    rmse_isi = sqrt(mean(isi_diff.^2));
+    mean_abs_isi_diff = mean(abs(isi_diff));
+    max_abs_isi_diff = max(abs(isi_diff));
     
-    % 5) Plot
-    figure('Name',"Voltage Comparison: "+cfg,'Color','white');
+    fprintf('\nISI Comparison:\n');
+    fprintf('Mean ISI difference: %.3f ms\n', mean(isi_diff));
+    fprintf('RMSE(ISI): %.3f ms\n', rmse_isi);
+    fprintf('Max ΔISI: %.3f ms\n', max_abs_isi_diff);
+
+    % Instantaneous firing rate (1000 / ISI for Hz)
+    fr1 = 1000 ./ isi1;  % Hz
+    fr2 = 1000 ./ isi2;  % Hz
+
+    fprintf('\nMean Firing Frequencies:\n');
+    fprintf('  Yale:  %.2f Hz\n', mean(fr1));
+    fprintf('  Euler: %.2f Hz\n', mean(fr2));
+    fprintf('  Difference: %.2f Hz\n', mean(fr2) - mean(fr1));
+    
+    %% 6) Plot
+    %figure('Name',"Voltage Comparison: "+cfg,'Color','white');
+    %plot(t2, v2, 'b-', 'LineWidth',1.2); hold on;
+    %plot(t2, v1i,'r--','LineWidth',1.0);
+    %xlabel('Time (ms)'); ylabel('Voltage (mV)');
+    %title(cfg);
+    %legend({'Yale','Euler'}, 'Location','best');
+    %grid on;
+
+    %figure('Name',"Voltage Comparison: "+cfg,'Color','white','Position',[100 100 1200 800]);
+    
+    % Subplot 1: Voltage traces
+
+    %plot(t2, v2, 'b-', 'LineWidth',1.2); hold on;
+    %plot(t2, v1i,'r--','LineWidth',1.0);
+    %plot(tpk2, v2(pk2(1:n)), 'bo', 'MarkerSize',6, 'MarkerFaceColor','b');  % NEW: peak markers
+    %plot(tpk1, v1i(pk1(1:n)), 'ro', 'MarkerSize',6, 'MarkerFaceColor','r');
+
+    % Create table (For ISI)
+    T = table(labels, all_ISI(:,1), all_ISI(:,2), ...
+        'VariableNames', {'Config','Yale_ISI','Euler_ISI'});
+    
+    disp(T);
+    
+    % Plot comparison
+    figure;
+    bar(all_ISI);
+    set(gca, 'XTickLabel', labels);
+    xlabel('Ion Channel Config');
+    ylabel('Mean ISI (ms)');
+    legend({'Yale','Euler'});
+    title('ISI Comparison Across Configurations');
+    grid on;
+
+    subplot(3,1,1);
     plot(t2, v2, 'b-', 'LineWidth',1.2); hold on;
     plot(t2, v1i,'r--','LineWidth',1.0);
     xlabel('Time (ms)'); ylabel('Voltage (mV)');
@@ -134,12 +201,24 @@ for c = 1:numel(configs)
     legend({'Yale','Euler'}, 'Location','best');
     grid on;
     
+    % Subplot 2: ISI comparison
+    subplot(3,1,2);
+    spike_intervals = 1:numel(isi1);
+    plot(spike_intervals, isi1, 'ro-', 'LineWidth',1.5); hold on;
+    plot(spike_intervals, isi2, 'bo-', 'LineWidth',1.5);
+    ylabel('ISI (ms)');
+    title('Intraspike Intervals');
+        
+    % Subplot 3: ISI difference over time
+    subplot(3,1,3);
+    plot(spike_intervals, isi_diff, 'ko-', 'LineWidth',1.5);
+    yline(0, 'r--');
+    ylabel('ΔISI (ms) [Euler - Yale]');
+    title('ISI Drift');
+    
     % fprintf('%.6f, %.6f', max(data2), min(data2));
    
     % Close current plot before computing the next plot and stats.
-    uiwait(gcf);
+    %uiwait(gcf);
     
-end    
-
-% Count of spikes is amiss | fixed with threshold
-% Neuroscience metric : intraspike interval
+end

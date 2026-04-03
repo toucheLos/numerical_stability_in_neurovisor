@@ -11,7 +11,7 @@ USE_NA = True # m, h
 USE_K = True # n
 USE_LEAK = True
 USE_CaH = False  # q, r (high-threshold Ca)
-USE_T = True # u (T-type Ca). s_inf is instantaneous and NOT integrated.
+USE_T = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
 USE_M = False # p (slow K / M-current)
 
 # Membrane Capacitance
@@ -29,8 +29,8 @@ C_tot = C_m * soma_area  # F (total capacitance)
 def I_stim(t):
     stimAmplitude = 0.15e-11 / soma_area
     # print("stimAmp = " + str(stimAmplitude))
-    return 0.0
-    # return stimAmplitude if (50e-3 <= t < 350e-3) else 0.0
+    # return 0.0
+    return stimAmplitude if (50e-3 <= t < 350e-3) else 0.0
 
 # import math
 # r_um = 33.5       # µm
@@ -194,8 +194,8 @@ if __name__ == "__main__":
         ch.init_m(V0) if USE_NA else 0.0, # m
         ch.init_n(V0) if USE_K else 0.0, # n
         ch.init_h(V0) if USE_NA else 0.0, # h
-        ch.init_p(V0) if USE_M  else 0.0, # p
-        # 0.0 if USE_M  else 0.0, # p
+        # ch.init_p(V0) if USE_M  else 0.0, # p
+        0.0 if USE_M  else 0.0, # p
         ch.init_q(V0) if USE_CaH else 0.0, # q
         ch.init_u(V0) if USE_T else 0.0, # u
         ch.init_r(V0) if USE_CaH else 0.0 # r
