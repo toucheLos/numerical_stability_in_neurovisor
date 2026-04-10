@@ -29,9 +29,9 @@ soma.nseg = 1
 USE_NA = True
 USE_K = True
 USE_PAS = True
-USE_CA = False
-USE_CAT = False
-USE_KM = False
+USE_CA = True
+USE_CAT = True
+USE_KM = True
 
 for sec in [soma]:
     if USE_PAS:
@@ -68,7 +68,7 @@ for sec in [soma]:
     if USE_CAT:
         sec.insert("original_caT")
         for seg in sec:
-            seg.original_caT.gTbar = 4.0e-2
+            seg.original_caT.gTbar = 4.0e-4
             if not USE_CA:
                 seg.eca = 120
 
@@ -83,7 +83,7 @@ for sec in [soma]:
 
 I_total_nA = 0.0015
 stim_start = 50.0
-stim_end = 350.0
+stim_end = 150.0
 
 iclamp = h.IClamp(soma(0.5))
 iclamp.delay = stim_start
@@ -92,8 +92,8 @@ iclamp.amp = I_total_nA  # nA, same as Python total
 
 
 # 5. Simulation control
-h.v_init = 0
-tstop = 500
+h.v_init = -70
+tstop = 200
 h.dt = 50e-5
 h.tstop = tstop
 h.finitialize(h.v_init)
@@ -153,7 +153,7 @@ plt.figure(figsize=(9,6))
 plt.plot(t_vec, v_vec, 'k', linewidth=2)
 plt.xlabel("Time (ms)")
 plt.ylabel("Membrane potential (mV)")
-plt.title("NEURON Simulation (Aligned with Python Euler)")
+plt.title("NEURON Simulation")
 plt.grid(alpha=0.3)
 plt.tight_layout()
 plt.show()

@@ -13,24 +13,26 @@ labels = [];
 recording_path = "neuron_recordings/";
 
 % Names for each ion channel config
-configs = [
-    "na_k_leak"
-    "na_k_leak_ca"
-    "na_k_leak_lowca"
-    "na_k_leak_slowk"
-    "na_k_leak_ca_lowca"
-    "na_k_leak_ca_slowk"
-    "na_k_leak_lowca_slowk"
-    "na_k_leak_ca_lowca_slowk"
-];
+% configs = [
+%     "na_k_leak"
+%     "na_k_leak_ca"
+%     "na_k_leak_lowca"
+%     "na_k_leak_slowk"
+%     "na_k_leak_ca_lowca"
+%     "na_k_leak_ca_slowk"
+%     "na_k_leak_lowca_slowk"
+%     "na_k_leak_ca_lowca_slowk"
+% ];
 
 % Choose prefixes for files
 prefix1 = "yale_";
-prefix2 = "euler_";
+% prefix2 = "euler_";
+prefix2 = "nv_";
+% cfg = "na_k_leak";
 
 for c = 1:numel(configs)
     cfg = configs(c); 
-    
+
     % Build the two filepaths
     file1 = recording_path + prefix1 + cfg + ".csv";
     file2 = recording_path + prefix2 + cfg + ".csv";
@@ -46,6 +48,8 @@ for c = 1:numel(configs)
         continue;
     end
 
+    % file1 = recording_path + prefix2 + cfg + ".csv";
+    % file2 = recording_path + prefix1 + cfg + ".csv";
 % data1 = readmatrix("C:\Users\playtoe\Programs\neuron\neurovisor-current\Assets\CSV_Files\neuro_visor_recording_02-06-2026-11-43-24.csv");
 % data1 = readmatrix("/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/neuron_recordings/yale_na_k_leak_ca.csv");
 % data2 = readmatrix("/Users/carlos/Desktop/neuron/numerical_stability_in_neurovisor/neuron_recordings/euler_na_k_leak_ca.csv");
@@ -67,7 +71,7 @@ for c = 1:numel(configs)
     
     % Print RMSE if 0
     if rmseVal == 0
-        rdisp("rmseVal is equal to 0.")
+        disp("rmseVal is equal to 0.")
     end
     
     % RMSE / Strength of Signal
@@ -219,6 +223,11 @@ for c = 1:numel(configs)
     % fprintf('%.6f, %.6f', max(data2), min(data2));
    
     % Close current plot before computing the next plot and stats.
-    %uiwait(gcf);
+    uiwait(gcf);
     
 end
+
+% | euler_isi - yale_isi | / yale_isi
+% Send Zach an organized list of parameters
+% - as detailed as possible. 
+% ion channel panel, 
