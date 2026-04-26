@@ -10,7 +10,7 @@ from scipy.optimize import fsolve
 USE_NA = True # m, h
 USE_K = True # n
 USE_LEAK = True
-USE_CaH = False  # q, r (high-threshold Ca)
+USE_CaH = True  # q, r (high-threshold Ca)
 USE_T = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
 USE_M = False # p (slow K / M-current)
 
@@ -30,7 +30,7 @@ def I_stim(t):
     stimAmplitude = 0.15e-11 / soma_area
     # print("stimAmp = " + str(stimAmplitude))
     # return 0.0
-    return stimAmplitude if (50e-3 <= t < 350e-3) else 0.0
+    return stimAmplitude if (50e-3 <= t < 150e-3) else 0.0
 
 # import math
 # r_um = 33.5       # µm
@@ -175,7 +175,7 @@ def forward_euler(y0, dt, steps, rhs):
 
 if __name__ == "__main__":
     # Simulation settings
-    T  = 50000e-3 # seconds
+    T  = 200e-3 # seconds
     dt = 50e-7 # seconds
     steps = int(round(T / dt))
     V0 = 0 # intial Voltage (in V)
@@ -244,8 +244,8 @@ if __name__ == "__main__":
     if USE_T: channels.append("lowca")
     if USE_M: channels.append("slowk")
 
-    # filename = f"~/Desktop/neuron/numerical_stability_in_neuurovisor/neuron_recordings/euler_{'_'.join(channels)}.csv"
-    filename = "../neuron_recordings/euler_trace.csv"
+    filename = f"./neuron_recordings/euler_{'_'.join(channels)}.csv"
+    # filename = "./neuron_recordings/euler_3.csv"
 
     np.savetxt(
         filename,
