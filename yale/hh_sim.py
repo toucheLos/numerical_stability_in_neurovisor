@@ -29,9 +29,9 @@ soma.nseg = 1
 USE_NA = True
 USE_K = True
 USE_PAS = True
-USE_CA = True
+USE_CA = False
 USE_CAT = True
-USE_KM = True
+USE_KM = False
 
 for sec in [soma]:
     if USE_PAS:

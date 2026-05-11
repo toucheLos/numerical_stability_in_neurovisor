@@ -10,8 +10,8 @@ from scipy.optimize import fsolve
 USE_NA = True # m, h
 USE_K = True # n
 USE_LEAK = True
-USE_CaH = True  # q, r (high-threshold Ca)
-USE_T = False # u (T-type Ca). s_inf is instantaneous and NOT integrated.
+USE_CaH = False  # q, r (high-threshold Ca)
+USE_T = True # u (T-type Ca). s_inf is instantaneous and NOT integrated.
 USE_M = False # p (slow K / M-current)
 
 # Membrane Capacitance
@@ -47,13 +47,6 @@ def I_stim(t):
 # If a channel is OFF, we keep its derivative = 0 (state frozen).
 
 def resting_current(V, use_na=None, use_k=None, use_leak=None, use_cah=None, use_t=None, use_m=None):
-    # Fall back to global toggles if not specified
-    if use_na   is None: use_na   = USE_NA
-    if use_k    is None: use_k    = USE_K
-    if use_leak is None: use_leak = USE_LEAK
-    if use_cah  is None: use_cah  = USE_CaH
-    if use_t    is None: use_t    = USE_T
-    if use_m    is None: use_m    = USE_M
 
     V = float(np.atleast_1d(V)[0])
 
@@ -114,6 +107,7 @@ def rhs(y, t):
         dr = (ar[0]*(1.0 - r) - br[0]*r)
 
     if USE_T:
+        # T-current gate: du/dt = (u_inf - u)/tau_u
         # au, bu = ch.t_alpha_beta_u(Vv)
         # du = (au[0]*(1.0 - u) - bu[0]*u)
         du = ((ch.t_u_inf(Vv) - u) / ch.t_tau_u(Vv))[0]
@@ -131,7 +125,7 @@ def rhs(y, t):
     if USE_CaH:
         Im += ch.ca_high_current(V, q, r)
     if USE_T:
-        Im += ch.G_DEFAULT['gT'] * (s**2) * u * (V - ch.E_DEFAULT['Eca'])
+        Im += ch.t_current(V, u)
     if USE_M:
         Im += ch.m_current(V, p)
 
@@ -178,7 +172,7 @@ if __name__ == "__main__":
     T  = 200e-3 # seconds
     dt = 50e-7 # seconds
     steps = int(round(T / dt))
-    V0 = 0 # intial Voltage (in V)
+    V0 = -0.07 # intial Voltage (in V)
 
     # m, n, h, p, q, u, r = gates
     y0 = np.array([

@@ -52,10 +52,6 @@ UNITS {
 
 }
 
-INITIAL {
-    rates(v)
-    u = u_inf
-}
 
 PARAMETER {
 
@@ -91,7 +87,10 @@ ASSIGNED {
 
 }
 
-
+INITIAL {
+    rates(v)
+    u = 0.0
+}
 
 BREAKPOINT {
 
@@ -119,6 +118,6 @@ PROCEDURE rates(v(mV)) {
 
     u_inf = 1.0 / (1.0 + exp((v + Vx + 81.0)/4.0))
 
-    tau_u = (30.8 + 211.4 + exp((v + Vx + 113.2)/5.0)) / (3.7 * (1.0 + exp((v + Vx + 84.0)/3.2)))
+    tau_u = 30.8 + (211.4 + exp((v + Vx + 113.2)/5.0)) / (3.7 * (1.0 + exp((v + Vx + 84.0)/3.2)))
 
 }

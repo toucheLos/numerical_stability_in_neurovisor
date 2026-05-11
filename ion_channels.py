@@ -152,18 +152,18 @@ def t_u_inf(V, Vx_mV=V_SHIFTS['Vx']):
 
 def t_tau_u(V, Vx_mV=V_SHIFTS['Vx']):
     Vm = mV(V); Vx=float(Vx_mV)
-    num = (30.8 + 211.4 + np.exp((Vm + Vx + 113.2)/5.0))
+    num = 30.8 + (211.4 + np.exp((Vm + Vx + 113.2)/5.0))
     den = 3.7 * (1.0 + np.exp((Vm + Vx + 84.0)/3.2))
     # out = np.full_like(Vm, np.inf)
     out = num / den
     return out
 
-def t_alpha_beta_u(V, Vx_mV=V_SHIFTS['Vx']):
-    ui  = t_u_inf(V, Vx_mV)
-    tau = t_tau_u(V, Vx_mV)
-    a = np.divide(ui, tau, out=np.zeros_like(ui), where=(tau!=0))
-    b = np.divide(1.0 - ui, tau, out=np.zeros_like(ui), where=(tau!=0))
-    return a, b
+# def t_alpha_beta_u(V, Vx_mV=V_SHIFTS['Vx']):
+#     ui  = t_u_inf(V, Vx_mV)
+#     tau = t_tau_u(V, Vx_mV)
+#     a = np.divide(ui, tau, out=np.zeros_like(ui), where=(tau!=0))
+#     b = np.divide(1.0 - ui, tau, out=np.zeros_like(ui), where=(tau!=0))
+#     return a, b
 
 def init_u(V, Vx_mV=V_SHIFTS['Vx']):
     return t_u_inf(V, Vx_mV)

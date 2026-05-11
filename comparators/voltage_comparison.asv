@@ -174,7 +174,7 @@ for c = 1:numel(configs)
     plot(t2, v1i,'r--','LineWidth',1.0);
     xlabel('Time (ms)'); ylabel('Voltage (mV)');
     title(cfg);
-    legend({'Yale','Euler'}, 'Location','best');
+    legend({'Yale','NeuroVISOR'}, 'Location','best');
     grid on;
 
     figure('Name',"Voltage Comparison: "+cfg,'Color','white','Position',[100 100 1200 800]);
@@ -192,28 +192,28 @@ for c = 1:numel(configs)
     
     disp(T);
 
-    % subplot(3,1,1);
-    % plot(t2, v2, 'b-', 'LineWidth',1.2); hold on;
-    % plot(t2, v1i,'r--','LineWidth',1.0);
-    % xlabel('Time (ms)'); ylabel('Voltage (mV)');
-    % title(cfg);
-    % legend({'Yale','NeuroVISOR'}, 'Location','best');
-    % grid on;
-    % 
-    % % Subplot 2: ISI comparison
-    % subplot(3,1,2);
-    % spike_intervals = 1:numel(isi1);
-    % plot(spike_intervals, isi1, 'ro-', 'LineWidth',1.5); hold on;
-    % plot(spike_intervals, isi2, 'bo-', 'LineWidth',1.5);
-    % ylabel('ISI (ms)');
-    % title('Intraspike Intervals');
-    % 
-    % % Subplot 3: ISI difference over time
-    % subplot(3,1,3);
-    % plot(spike_intervals, isi_diff, 'ko-', 'LineWidth',1.5);
-    % yline(0, 'r--');
-    % ylabel('ΔISI (ms) [NeuroVISOR - Yale]');
-    % title('ISI Drift');
+    subplot(3,1,1);
+    plot(t2, v2, 'b-', 'LineWidth',1.2); hold on;
+    plot(t2, v1i,'r--','LineWidth',1.0);
+    xlabel('Time (ms)'); ylabel('Voltage (mV)');
+    title(cfg);
+    legend({'Yale','NeuroVISOR'}, 'Location','best');
+    grid on;
+
+    % Subplot 2: ISI comparison
+    subplot(3,1,2);
+    spike_intervals = 1:numel(isi1);
+    plot(spike_intervals, isi1, 'ro-', 'LineWidth',1.5); hold on;
+    plot(spike_intervals, isi2, 'bo-', 'LineWidth',1.5);
+    ylabel('ISI (ms)');
+    title('Intraspike Intervals');
+
+    % Subplot 3: ISI difference over time
+    subplot(3,1,3);
+    plot(spike_intervals, isi_diff, 'ko-', 'LineWidth',1.5);
+    yline(0, 'r--');
+    ylabel('ΔISI (ms) [Euler - Yale]');
+    title('ISI Drift');
     
     % fprintf('%.6f, %.6f', max(data2), min(data2));
    
